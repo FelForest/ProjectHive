@@ -34,6 +34,7 @@ APHPartsCharacter::APHPartsCharacter()
 
 
 	// Setting Camera
+	// TODO : Consider moving to an attackable character
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 
