@@ -16,10 +16,3 @@ void APHCharacterBase::BeginPlay()
 	
 }
 
-// Called to bind functionality to input
-void APHCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-

@@ -20,6 +20,8 @@ APHPartsCharacter::APHPartsCharacter()
 	// Setting Skeletal Mesh Parts
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -HalfHeight), FRotator(0.0f, -90.0f, 0.0f));
 
+	// TODO : Load SkeletalMesh for customizing
+
 	HeadMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadMesh"));
 	HeadMesh->SetupAttachment(GetMesh());
 	HeadMesh->SetLeaderPoseComponent(GetMesh());
@@ -42,6 +44,7 @@ APHPartsCharacter::APHPartsCharacter()
 	// length, angle, etc...
 	SpringArm->TargetArmLength = 1400.0f;
 	SpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
+	SpringArm->bDoCollisionTest = false;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
