@@ -5,9 +5,6 @@
 
 #include "Components/CapsuleComponent.h"
 
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-
 
 APHPartsCharacter::APHPartsCharacter()
 {
@@ -34,18 +31,4 @@ APHPartsCharacter::APHPartsCharacter()
 	LegMesh->SetupAttachment(GetMesh());
 	LegMesh->SetLeaderPoseComponent(GetMesh());
 
-
-	// Setting Camera
-	// TODO : Consider moving to an attackable character
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(GetRootComponent());
-
-	// Update later
-	// length, angle, etc...
-	SpringArm->TargetArmLength = 1400.0f;
-	SpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
-	SpringArm->bDoCollisionTest = false;
-
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(SpringArm);
 }

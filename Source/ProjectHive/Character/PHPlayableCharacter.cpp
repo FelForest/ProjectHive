@@ -1,17 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/PHAttackableCharacter.h"
+#include "Character/PHPlayableCharacter.h"
 
 #include "Weapon/PHWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
 
-APHAttackableCharacter::APHAttackableCharacter()
+APHPlayableCharacter::APHPlayableCharacter()
 {
 	// Setting Weapon 
 	Weapon = CreateDefaultSubobject<UPHWeaponComponent>(TEXT("WeaponComponent"));
@@ -39,9 +42,23 @@ APHAttackableCharacter::APHAttackableCharacter()
 	{
 		MoveAction = MoveInputActionRef.Object;
 	}
+
+	// Setting Camera
+	// TODO : Consider moving to an attackable character
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(GetRootComponent());
+
+	// Update later
+	// length, angle, etc...
+	SpringArm->TargetArmLength = 1400.0f;
+	SpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
+	SpringArm->bDoCollisionTest = false;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm);
 }
 
-void APHAttackableCharacter::BeginPlay()
+void APHPlayableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -56,19 +73,19 @@ void APHAttackableCharacter::BeginPlay()
 
 
 
-void APHAttackableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	auto EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(MoveAction,ETriggerEvent::Triggered, this, &APHAttackableCharacter::Move);
+	EnhancedInputComponent->BindAction(MoveAction,ETriggerEvent::Triggered, this, &APHPlayableCharacter::Move);
 
 
 
 }
 
-void APHAttackableCharacter::Move(const FInputActionValue& Value)
+void APHPlayableCharacter::Move(const FInputActionValue& Value)
 {
 	FVector2D Movement = Value.Get<FVector2D>();
 

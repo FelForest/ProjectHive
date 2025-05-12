@@ -28,12 +28,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
 	TObjectPtr<USkeletalMeshComponent> LegMesh;
 
-
-	// Camera Section
-	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
-	TObjectPtr<class USpringArmComponent> SpringArm;
-
-	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
-	TObjectPtr<class UCameraComponent> Camera;
-
 };

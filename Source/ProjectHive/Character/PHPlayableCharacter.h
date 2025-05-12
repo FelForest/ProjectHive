@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "Character/PHPartsCharacter.h"
 #include "InputActionValue.h"
-#include "PHAttackableCharacter.generated.h"
+
+#include "Interface/PHAttackableInterface.h"
+
+#include "PHPlayableCharacter.generated.h"
 
 // TODO : Consider Delegate Param
 DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
@@ -14,12 +17,14 @@ DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
  * 
  */
 UCLASS()
-class PROJECTHIVE_API APHAttackableCharacter : public APHPartsCharacter
+class PROJECTHIVE_API APHPlayableCharacter : 
+	public APHPartsCharacter,
+	public IPHAttackableInterface
 {
 	GENERATED_BODY()
 	
 public:
-	APHAttackableCharacter();
+	APHPlayableCharacter();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -47,11 +52,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
-
 	// Input Section
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
+
+	// Camera Section
+	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class USpringArmComponent> SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UCameraComponent> Camera;
+
 };
