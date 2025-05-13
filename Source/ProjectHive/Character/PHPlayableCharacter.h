@@ -6,7 +6,7 @@
 #include "Character/PHPartsCharacter.h"
 #include "InputActionValue.h"
 
-#include "Interface/PHAttackableInterface.h"
+#include "Interface/PHAttackInterface.h"
 
 #include "PHPlayableCharacter.generated.h"
 
@@ -19,28 +19,31 @@ DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
 UCLASS()
 class PROJECTHIVE_API APHPlayableCharacter : 
 	public APHPartsCharacter,
-	public IPHAttackableInterface
+	public IPHAttackInterface
 {
 	GENERATED_BODY()
 	
 public:
 	APHPlayableCharacter();
 
-	// Called to bind functionality to input
+	// Called when possessed by a player controller to bind input functionality. 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Delegate Section
 	// TODO : Complete
 	void SetEquipment(/*InEquipment*/);
 
-protected:
-	void Move(const FInputActionValue& Value);
-
-public:
-	FOnEquipmentAcquired OnEquipmentAcquired;
+	virtual void Attack() override;
 
 protected:
 	virtual void BeginPlay() override;
+
+	void Move(const FInputActionValue& Value);
+
+	
+
+public:
+	FOnEquipmentAcquired OnEquipmentAcquired;
 
 protected:
 	// Weapon Section
@@ -56,8 +59,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> MoveAction;*/
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> MoveAction;
+	TObjectPtr<class UPHCharacterInputActionData> CharacterInputActionData;
 
 	// Camera Section
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))

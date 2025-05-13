@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "PHAttackableInterface.generated.h"
+#include "PHAttackInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UPHAttackableInterface : public UInterface
+class UPHAttackInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,10 +16,11 @@ class UPHAttackableInterface : public UInterface
 /**
  * 
  */
-class PROJECTHIVE_API IPHAttackableInterface
+class PROJECTHIVE_API IPHAttackInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	virtual void Attack() = 0;
 };

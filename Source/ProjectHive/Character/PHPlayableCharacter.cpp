@@ -6,9 +6,12 @@
 #include "Weapon/PHWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
+#include "Data/PHCharacterSkeletalMeshData.h"
+
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
+#include "Input/PHCharacterInputActionData.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -23,6 +26,33 @@ APHPlayableCharacter::APHPlayableCharacter()
 	WeaponMesh->SetupAttachment(GetMesh());
 	WeaponMesh->SetLeaderPoseComponent(GetMesh());
 
+	// Setting SkeletalMesh
+	static ConstructorHelpers::FObjectFinder<UPHCharacterSkeletalMeshData> CharacterParts(TEXT("/Game/ProjectHive/Data/Character/PHC_PartsData.PHC_PartsData"));
+	if (CharacterParts.Object)
+	{
+		USkeletalMesh* Head = CharacterParts.Object->HeadMesh;
+		USkeletalMesh* Body = CharacterParts.Object->BodyMesh;
+		USkeletalMesh* Arm = CharacterParts.Object->ArmMesh;
+		USkeletalMesh* Leg = CharacterParts.Object->LegMesh;
+
+		if (Body != nullptr)
+		{
+			GetMesh()->SetSkeletalMesh(Body);
+		}
+		if (Head != nullptr)
+		{
+			HeadMesh->SetSkeletalMesh(Head);
+		}
+		if (Arm != nullptr)
+		{
+			ArmMesh->SetSkeletalMesh(Arm);
+		}
+		if (Leg != nullptr)
+		{
+			LegMesh->SetSkeletalMesh(Leg);
+		}
+	}
+
 	// Setting AnimInstance
 	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/ABP_AR.ABP_AR_C"));
 	if (CharacterAnim.Class)
@@ -31,16 +61,16 @@ APHPlayableCharacter::APHPlayableCharacter()
 	}
 
 	// Setting Input
-
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/ProjectHive/Input/IMC_Player.IMC_Player"));
 	if (InputMappingContextRef.Object != nullptr)
 	{
 		DefaultMappingContext = InputMappingContextRef.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> MoveInputActionRef = TEXT("/Game/ProjectHive/Input/Action/IA_Move.IA_Move");
-	if (MoveInputActionRef.Object != nullptr)
+
+	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData");
+	if (CharacterInputActionDataRef.Object != nullptr)
 	{
-		MoveAction = MoveInputActionRef.Object;
+		CharacterInputActionData = CharacterInputActionDataRef.Object;
 	}
 
 	// Setting Camera
@@ -67,11 +97,7 @@ void APHPlayableCharacter::BeginPlay()
 	{
 		SubSystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-
-
 }
-
-
 
 void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -79,7 +105,9 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	auto EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(MoveAction,ETriggerEvent::Triggered, this, &APHPlayableCharacter::Move);
+	CastChecked<UPHCharacterInputActionData>(CharacterInputActionData);
+
+	EnhancedInputComponent->BindAction(CharacterInputActionData->MoveInputAction, ETriggerEvent::Triggered, this, &APHPlayableCharacter::Move);
 
 
 
@@ -99,7 +127,7 @@ void APHPlayableCharacter::Move(const FInputActionValue& Value)
 		Movement.Normalize();
 		MovementVectorSize = 1.0f;
 	}
-	// if input's scale under one, Cacluate scale to use 
+	// if input's scale under one, calculate scale to use 
 	else
 	{
 		MovementVectorSize = FMath::Sqrt(MovementVectorSizeSquared);
@@ -108,6 +136,23 @@ void APHPlayableCharacter::Move(const FInputActionValue& Value)
 	FVector MoveDirection = FVector(Movement.X, Movement.Y, 0.0f);
 
 	AddMovementInput(MoveDirection, MovementVectorSize);
+}
+
+void APHPlayableCharacter::SetEquipment()
+{
+	//WeaponMesh->SetSkeletalMesh()
+	if (Weapon != nullptr)
+	{
+		Weapon->SetWeapon();
+	}
+}
+
+void APHPlayableCharacter::Attack()
+{
+	if (Weapon != nullptr)
+	{
+		Weapon->Attack();
+	}
 }
 
 

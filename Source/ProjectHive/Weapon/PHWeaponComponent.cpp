@@ -6,6 +6,15 @@
 // Sets default values for this component's properties
 UPHWeaponComponent::UPHWeaponComponent()
 {
+	
+}
 
+void UPHWeaponComponent::Attack()
+{
+}
+
+void UPHWeaponComponent::SetWeapon()
+{
+	// Use Delegate to UI
 }
 
