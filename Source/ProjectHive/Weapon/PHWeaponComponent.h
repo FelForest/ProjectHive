@@ -21,4 +21,5 @@ public:
 
 	UFUNCTION()
 	void SetWeapon(/*New WeaponData*/);
+	
 };

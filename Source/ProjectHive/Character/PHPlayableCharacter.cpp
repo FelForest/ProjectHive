@@ -6,12 +6,11 @@
 #include "Weapon/PHWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
-#include "Data/PHCharacterSkeletalMeshData.h"
-
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
-#include "Input/PHCharacterInputActionData.h"
+//#include "Input/PHCharacterInputActionData.h"
+
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -22,36 +21,10 @@ APHPlayableCharacter::APHPlayableCharacter()
 	// Setting Weapon 
 	Weapon = CreateDefaultSubobject<UPHWeaponComponent>(TEXT("WeaponComponent"));
 
+	// Need to Setting before AnimInstance Setting
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(GetMesh());
 	WeaponMesh->SetLeaderPoseComponent(GetMesh());
-
-	// Setting SkeletalMesh
-	static ConstructorHelpers::FObjectFinder<UPHCharacterSkeletalMeshData> CharacterParts(TEXT("/Game/ProjectHive/Data/Character/PHC_PartsData.PHC_PartsData"));
-	if (CharacterParts.Object)
-	{
-		USkeletalMesh* Head = CharacterParts.Object->HeadMesh;
-		USkeletalMesh* Body = CharacterParts.Object->BodyMesh;
-		USkeletalMesh* Arm = CharacterParts.Object->ArmMesh;
-		USkeletalMesh* Leg = CharacterParts.Object->LegMesh;
-
-		if (Body != nullptr)
-		{
-			GetMesh()->SetSkeletalMesh(Body);
-		}
-		if (Head != nullptr)
-		{
-			HeadMesh->SetSkeletalMesh(Head);
-		}
-		if (Arm != nullptr)
-		{
-			ArmMesh->SetSkeletalMesh(Arm);
-		}
-		if (Leg != nullptr)
-		{
-			LegMesh->SetSkeletalMesh(Leg);
-		}
-	}
 
 	// Setting AnimInstance
 	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/ABP_AR.ABP_AR_C"));
@@ -61,13 +34,13 @@ APHPlayableCharacter::APHPlayableCharacter()
 	}
 
 	// Setting Input
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/ProjectHive/Input/IMC_Player.IMC_Player"));
+	/*static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/ProjectHive/Input/IMC_Player.IMC_Player"));
 	if (InputMappingContextRef.Object != nullptr)
 	{
 		DefaultMappingContext = InputMappingContextRef.Object;
-	}
+	}*/
 
-	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData");
+	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Script/ProjectHive.PHCharacterInputActionData'/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData'");
 	if (CharacterInputActionDataRef.Object != nullptr)
 	{
 		CharacterInputActionData = CharacterInputActionDataRef.Object;
@@ -86,15 +59,24 @@ APHPlayableCharacter::APHPlayableCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	// Setting Action
+	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
 }
 
 void APHPlayableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (CharacterInputActionData != nullptr)
+	{
+		DefaultMappingContext = CharacterInputActionData->CharacterInputMapping;
+	}
+
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
+		SubSystem->ClearAllMappings();
 		SubSystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 }
@@ -103,14 +85,9 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	auto EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
+	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	CastChecked<UPHCharacterInputActionData>(CharacterInputActionData);
-
-	EnhancedInputComponent->BindAction(CharacterInputActionData->MoveInputAction, ETriggerEvent::Triggered, this, &APHPlayableCharacter::Move);
-
-
-
+	BindInputAction(EnhancedInputComponent);
 }
 
 void APHPlayableCharacter::Move(const FInputActionValue& Value)
@@ -136,6 +113,30 @@ void APHPlayableCharacter::Move(const FInputActionValue& Value)
 	FVector MoveDirection = FVector(Movement.X, Movement.Y, 0.0f);
 
 	AddMovementInput(MoveDirection, MovementVectorSize);
+}
+
+void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
+{
+	if (CharacterInputActionData == nullptr)
+	{
+		return;
+	}
+
+	for (const auto& pair : CharacterInputActionData->InputBindings)
+	{
+		auto ActionType = pair.Key;
+		auto Action = pair.Value.InputAction;
+		if (Action == nullptr)
+		{
+			continue;
+		}
+		auto TriggerEvent = pair.Value.TriggerEvent;
+
+		if (const auto* MappingFunc = ActionMapping.Find(ActionType))
+		{
+			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
+		}
+	}
 }
 
 void APHPlayableCharacter::SetEquipment()

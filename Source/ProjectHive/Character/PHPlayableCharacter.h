@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Character/PHPartsCharacter.h"
+
 #include "InputActionValue.h"
+#include "Input/PHCharacterInputActionData.h"
 
 #include "Interface/PHAttackInterface.h"
+
 
 #include "PHPlayableCharacter.generated.h"
 
@@ -40,7 +43,7 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
-	
+	void BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent);
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
@@ -51,9 +54,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<class UPHWeaponComponent> Weapon;
 
-	// Mesh Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
-	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
+	TObjectPtr<class USkeletalMeshComponent> WeaponMesh;
 
 	// Input Section
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -72,4 +74,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UCameraComponent> Camera;
 
+protected:
+	// No magic
+	TMap<ECharacterActionType, void (APHPlayableCharacter::*)(const FInputActionValue&)> ActionMapping;
 };

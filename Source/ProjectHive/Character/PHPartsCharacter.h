@@ -17,6 +17,12 @@ class PROJECTHIVE_API APHPartsCharacter : public APHCharacterBase
 public:
 	APHPartsCharacter();
 
+
+protected:
+	virtual void BeginPlay() override;
+
+	void SetCharacterPartsMesh();
+
 protected:
 	// SketalMesh Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
@@ -27,5 +33,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
 	TObjectPtr<USkeletalMeshComponent> LegMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMeshData)
+	TObjectPtr<class UPHCharacterSkeletalMeshData> PartsMeshData;
 
 };

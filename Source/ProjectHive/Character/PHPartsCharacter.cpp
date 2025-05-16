@@ -5,6 +5,8 @@
 
 #include "Components/CapsuleComponent.h"
 
+#include "Data/PHCharacterSkeletalMeshData.h"
+
 
 APHPartsCharacter::APHPartsCharacter()
 {
@@ -31,4 +33,45 @@ APHPartsCharacter::APHPartsCharacter()
 	LegMesh->SetupAttachment(GetMesh());
 	LegMesh->SetLeaderPoseComponent(GetMesh());
 
+	// Setting SkeletalMesh
+	static ConstructorHelpers::FObjectFinder<UPHCharacterSkeletalMeshData> CharacterParts(TEXT("/Game/ProjectHive/Data/Character/PHC_PartsData.PHC_PartsData"));
+	if (CharacterParts.Object != nullptr)
+	{
+		PartsMeshData = CharacterParts.Object;
+
+		SetCharacterPartsMesh();
+	}
+
+}
+
+void APHPartsCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetCharacterPartsMesh();
+}
+
+void APHPartsCharacter::SetCharacterPartsMesh()
+{
+	USkeletalMesh* Head = PartsMeshData->HeadMesh;
+	USkeletalMesh* Body = PartsMeshData->BodyMesh;
+	USkeletalMesh* Arm = PartsMeshData->ArmMesh;
+	USkeletalMesh* Leg = PartsMeshData->LegMesh;
+
+	if (Body != nullptr)
+	{
+		GetMesh()->SetSkeletalMesh(Body);
+	}
+	if (Head != nullptr)
+	{
+		HeadMesh->SetSkeletalMesh(Head);
+	}
+	if (Arm != nullptr)
+	{
+		ArmMesh->SetSkeletalMesh(Arm);
+	}
+	if (Leg != nullptr)
+	{
+		LegMesh->SetSkeletalMesh(Leg);
+	}
 }
