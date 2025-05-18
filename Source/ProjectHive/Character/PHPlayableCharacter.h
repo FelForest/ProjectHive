@@ -13,7 +13,7 @@
 
 #include "PHPlayableCharacter.generated.h"
 
-// TODO : Consider Delegate Param
+// TODO: Define parameters for equipment delegate
 DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
 
 /**
@@ -41,16 +41,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	void Move(const FInputActionValue& Value);
-
 	void BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent);
+
+	void Move(const FInputActionValue& Value);
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
 
 protected:
 	// Weapon Section
-	// TODO : Request Naming Update
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<class UPHWeaponComponent> Weapon;
 
@@ -60,9 +59,6 @@ protected:
 	// Input Section
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> MoveAction;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UPHCharacterInputActionData> CharacterInputActionData;
@@ -75,6 +71,6 @@ protected:
 	TObjectPtr<class UCameraComponent> Camera;
 
 protected:
-	// No magic
+	// Stores binding functions matched to input action enum
 	TMap<ECharacterActionType, void (APHPlayableCharacter::*)(const FInputActionValue&)> ActionMapping;
 };

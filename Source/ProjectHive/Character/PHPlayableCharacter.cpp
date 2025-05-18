@@ -90,6 +90,30 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	BindInputAction(EnhancedInputComponent);
 }
 
+void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
+{
+	if (CharacterInputActionData == nullptr)
+	{
+		return;
+	}
+
+	for (const auto& pair : CharacterInputActionData->InputBindings)
+	{
+		auto ActionType = pair.Key;
+		auto Action = pair.Value.InputAction;
+		if (Action == nullptr)
+		{
+			continue;
+		}
+		auto TriggerEvent = pair.Value.TriggerEvent;
+
+		if (const auto* MappingFunc = ActionMapping.Find(ActionType))
+		{
+			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
+		}
+	}
+}
+
 void APHPlayableCharacter::Move(const FInputActionValue& Value)
 {
 	FVector2D Movement = Value.Get<FVector2D>();
@@ -115,29 +139,7 @@ void APHPlayableCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(MoveDirection, MovementVectorSize);
 }
 
-void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
-{
-	if (CharacterInputActionData == nullptr)
-	{
-		return;
-	}
 
-	for (const auto& pair : CharacterInputActionData->InputBindings)
-	{
-		auto ActionType = pair.Key;
-		auto Action = pair.Value.InputAction;
-		if (Action == nullptr)
-		{
-			continue;
-		}
-		auto TriggerEvent = pair.Value.TriggerEvent;
-
-		if (const auto* MappingFunc = ActionMapping.Find(ActionType))
-		{
-			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
-		}
-	}
-}
 
 void APHPlayableCharacter::SetEquipment()
 {
