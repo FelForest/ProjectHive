@@ -9,6 +9,7 @@
 #include "Input/PHCharacterInputActionData.h"
 
 #include "Interface/PHAttackInterface.h"
+#include "Interface/PHItemInterface.h"
 
 
 #include "PHPlayableCharacter.generated.h"
@@ -22,7 +23,8 @@ DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
 UCLASS()
 class PROJECTHIVE_API APHPlayableCharacter : 
 	public APHPartsCharacter,
-	public IPHAttackInterface
+	public IPHAttackInterface,
+	public IPHItemInterface
 {
 	GENERATED_BODY()
 	
@@ -36,7 +38,14 @@ public:
 	// TODO : Complete
 	void SetEquipment(/*InEquipment*/);
 
+	// AttackInterface
 	virtual void Attack() override;
+
+	// ItemInterface
+	virtual void PickupItem(class PHItem* InItem)  override;
+
+	// Called after all components have been initialized
+	virtual void PostInitializeComponents() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,8 +62,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<class UPHWeaponComponent> Weapon;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
-	TObjectPtr<class USkeletalMeshComponent> WeaponMesh;
+
 
 	// Input Section
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

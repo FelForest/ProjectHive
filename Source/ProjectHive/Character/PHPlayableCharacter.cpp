@@ -4,7 +4,7 @@
 #include "Character/PHPlayableCharacter.h"
 
 #include "Weapon/PHWeaponComponent.h"
-#include "Components/SkeletalMeshComponent.h"
+//#include "Components/SkeletalMeshComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -15,16 +15,16 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+// Item Including Section
+#include "Item/PHItem.h"
+#include "Interface/PHEquipInterface.h"
+
+
 
 APHPlayableCharacter::APHPlayableCharacter()
 {
 	// Setting Weapon 
 	Weapon = CreateDefaultSubobject<UPHWeaponComponent>(TEXT("WeaponComponent"));
-
-	// Need to Setting before AnimInstance Setting
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
-	WeaponMesh->SetupAttachment(GetMesh());
-	WeaponMesh->SetLeaderPoseComponent(GetMesh());
 
 	// Setting AnimInstance
 	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/ABP_AR.ABP_AR_C"));
@@ -156,6 +156,19 @@ void APHPlayableCharacter::Attack()
 	{
 		Weapon->Attack();
 	}
+}
+
+void APHPlayableCharacter::PickupItem(PHItem* InItem)
+{
+
+}
+
+void APHPlayableCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	Weapon->InitializeWeaponMesh(GetMesh());
+
 }
 
 
