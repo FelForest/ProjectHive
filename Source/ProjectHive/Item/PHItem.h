@@ -4,10 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/PHInteractableInterface.h"
 #include "PHItem.generated.h"
 
+/*
+* Author : 임동현
+* Date : 2025-05-26
+* 
+* Description : Item 클래스
+*				기본적인 획득이 가능한 
+* 
+*/
+
 UCLASS()
-class PROJECTHIVE_API APHItem : public AActor
+class PROJECTHIVE_API APHItem : public AActor,
+	public IPHInteractableInterface
 {
 	GENERATED_BODY()
 	
@@ -15,12 +26,19 @@ public:
 	// Sets default values for this actor's properties
 	APHItem();
 
+	// 상호작용 키 활성화용
+	void ShowUI();
+
+	// 상호작용 인터페이스 구현
+	virtual void Interact() override;
+
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UCapsuleComponent> ItemCollision;
+
+	//UPROPERTY()
+	//TObjectPtr<
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	
 };

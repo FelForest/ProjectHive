@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "PHEquipInterface.generated.h"
+#include "PHInteractableInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UPHEquipInterface : public UInterface
+class UPHInteractableInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,13 +16,12 @@ class UPHEquipInterface : public UInterface
 /**
  * 
  */
-class PROJECTHIVE_API IPHEquipInterface
+class PROJECTHIVE_API IPHInteractableInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-
-	// 장비될때 붙어야 하는곳을 알아야함
-
+	UFUNCTION()
+	virtual void Interact() = 0;
 };

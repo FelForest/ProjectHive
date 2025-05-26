@@ -23,6 +23,6 @@ class PROJECTHIVE_API IPHItemInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 
 public:
-	virtual void PickupItem(class PHItem* InItem) = 0;
+	virtual void PickupItem(class APHItem* InItem) = 0;
 public:
 };

@@ -11,7 +11,9 @@
 UENUM()
 enum class ECharacterActionType : uint8
 {
-	MoveAction = 1
+	None = 0,
+	MoveAction = 1,
+	InteractAction = 2
 };
 
 USTRUCT()

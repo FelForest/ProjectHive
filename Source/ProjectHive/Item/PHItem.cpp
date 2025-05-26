@@ -2,26 +2,22 @@
 
 
 #include "Item/PHItem.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 APHItem::APHItem()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	ItemCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("ItemCollision"));
+	SetRootComponent(ItemCollision);
+}
+
+void APHItem::ShowUI()
+{
 
 }
 
-// Called when the game starts or when spawned
-void APHItem::BeginPlay()
+void APHItem::Interact()
 {
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void APHItem::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
 }
 

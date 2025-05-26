@@ -23,11 +23,5 @@ public:
 	void SetWeapon(/*New WeaponData*/);
 
 	void InitializeWeaponMesh(class USkeletalMeshComponent* CharacterMesh);
-
-public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SkeletalMesh)
-	TObjectPtr<class USkeletalMeshComponent> WeaponMesh;
-
-
 	
 };
