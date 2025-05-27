@@ -14,4 +14,12 @@ class PROJECTHIVE_API APHPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	APHPlayerController();
+
+	UFUNCTION()
+	void ShowInteractUI(class AActor* Target);
+
+	UFUNCTION()
+	void HideInteractUI(class AActor* Target);
 };

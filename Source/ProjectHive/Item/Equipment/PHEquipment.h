@@ -26,6 +26,9 @@ public:
 		return EquipmentMesh;
 	}
 
+	UFUNCTION()
+	void OnPickup();
+
 protected:
 	// 이것도 데이터를 가져와서 세팅하는 방식이 좋을거 같음
 	// 장비 메시, 필요 데이터를 가지게 하는 방식으로 하는게 좋을듯

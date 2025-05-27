@@ -17,12 +17,16 @@
 
 // Interact Section
 #include "Interface/PHInteractableInterface.h"
+#include "Components/PHInteractComponent.h"
 
 // Item Including Section
 #include "Item/PHItem.h"
 #include "Item/Equipment/PHEquipment.h"
 
 #include "Components/CapsuleComponent.h"
+
+// 임시용
+#include "Player/PHPlayerController.h"
 
 
 
@@ -51,12 +55,16 @@ APHPlayableCharacter::APHPlayableCharacter()
 		CharacterInputActionData = CharacterInputActionDataRef.Object;
 	}
 
+	// Setting InputAction
+	MoveAction = CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction;
+	InteractAction = CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction;
+
 	// Setting Camera
 	// TODO : Consider moving to an attackable character
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 
-	// Update later
+	// TODO : Update later
 	// length, angle, etc...
 	SpringArm->TargetArmLength = 1400.0f;
 	SpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
@@ -65,48 +73,15 @@ APHPlayableCharacter::APHPlayableCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
-	// Setting Action
-	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
-	// TODO : Interactable 인터페이스 만들어진 후
-	//ActionMapping.Add(ECharacterActionType::InteractAction,)
+	// Setting InteractComponent
+	InteractComponent = CreateDefaultSubobject<UPHInteractComponent>(TEXT("InteractComponent"));
+
+	//// Setting Action
+	//ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
+	//// TODO : Interactable 인터페이스 만들어진 후
+	//ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
 }
 
-void APHPlayableCharacter::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	
-	// 현재는 싱글이지만 멀티인 경우 확인해야할 로직이 있음
-	// 먼저 로컬 컨트롤러 인지 확인
-	// 로컬이면 아이템의 UI를 활성화
-
-	// 다음은 서버에서만 하면 되는것
-	// 상호작용 액션의 값을 수정하게 하면 되는것
-	// 이값이 true이면 아이템 획득가능
-
-	// 일단 고민만 한걸로 하고 먼저 싱글로
-	APHItem* Item = Cast<APHItem>(OtherActor);
-
-	// 엔진 단에서 확인은 하지만 혹시나 해서 확인 -> 대부분 휴먼 오류
-	if (Item == nullptr)
-	{
-		return;
-	}
-
-	UE_LOG(LogTemp, Log, TEXT("ItemBeginOverLap"));
-
-	Item->ShowUI();
-}
-void APHPlayableCharacter::OnItemEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	// 클라
-	// 아이템의 UI를 끄는 방식
-	// 캐릭터가 아이템 획득 하고 콜리전이 꺼지면 이 함수 호출
-	// 둘다 하면 한명이 키고나서 다른 한명이 들어오고 나가면 꺼져버림
-
-	// 서버
-	// 상호작용 액션 가능 값을 false로 변경
-
-	UE_LOG(LogTemp, Log, TEXT("ItemEndOverLap"));
-}
 void APHPlayableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -121,6 +96,15 @@ void APHPlayableCharacter::BeginPlay()
 	{
 		SubSystem->ClearAllMappings();
 		SubSystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+
+	APHPlayerController* PHPlayerController = Cast<APHPlayerController>(GetController());
+
+	if (PHPlayerController != nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("PlayerController Possess"));
+		InteractComponent->OnInteractTargetOn.BindUObject(PHPlayerController, &APHPlayerController::ShowInteractUI);
+		InteractComponent->OnInteractTargetOff.BindUObject(PHPlayerController, &APHPlayerController::HideInteractUI);
 	}
 }
 
@@ -140,6 +124,7 @@ void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedIn
 		return;
 	}
 
+	/*
 	for (const auto& pair : CharacterInputActionData->InputBindings)
 	{
 		auto ActionType = pair.Key;
@@ -155,6 +140,20 @@ void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedIn
 			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
 		}
 	}
+	*/
+
+
+	
+	InEnhancedInputComponent->BindAction(
+		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction, 
+		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].TriggerEvent,
+		this, &APHPlayableCharacter::Move);
+
+	InEnhancedInputComponent->BindAction(
+		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].InputAction,
+		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].TriggerEvent,
+		this, &APHPlayableCharacter::Interact);
+
 }
 
 void APHPlayableCharacter::Move(const FInputActionValue& Value)
@@ -182,29 +181,29 @@ void APHPlayableCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(MoveDirection, MovementVectorSize);
 }
 
-void APHPlayableCharacter::Interact(AActor* InInteractor)
+void APHPlayableCharacter::Interact()
 {
-	IPHInteractableInterface* Interactable = Cast<IPHInteractableInterface>(InInteractor);
-
-	if (Interactable == nullptr)
-	{
-		return;
+	if (InteractComponent != nullptr)
+	{	
+		// 서버 RPC
+		InteractComponent->Interact();
 	}
-
-	Interactable->Interact();
 }
 
+// 이것도 컴포넌트로 조개야 할듯
 void APHPlayableCharacter::SetEquipment(APHEquipment* InEquipment)
 {
 	// 장비를 캐릭터의 SkeletalComponent에 붙이기
 	//	애니메이션 동기화를 위한 세팅
 	InEquipment->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	InEquipment->GetEquipmentMesh()->SetLeaderPoseComponent(GetMesh());
+	InEquipment->OnPickup();
 	//WeaponMesh->SetSkeletalMesh()
 	// 여기서 델리게이트 하는게 맞음
 	// 장비 스켈레톤 메시도 여기서 하는게 맞는듯
 	if (WeaponComponent != nullptr)
 	{
+		// 파라미터로 InEquipment 넘겨줘야함
 		WeaponComponent->SetWeapon();
 	}
 }
@@ -240,8 +239,8 @@ void APHPlayableCharacter::PostInitializeComponents()
 
 	if (Trigger != nullptr)
 	{
-		Trigger->OnComponentBeginOverlap.AddDynamic(this, &APHPlayableCharacter::OnItemBeginOverlap);
-		Trigger->OnComponentEndOverlap.AddDynamic(this, &APHPlayableCharacter::OnItemEndOverlap);
+		Trigger->OnComponentBeginOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableBeginOverlap);
+		Trigger->OnComponentEndOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableEndOverlap);
 	}
 }
 

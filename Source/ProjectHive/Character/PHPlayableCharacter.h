@@ -61,17 +61,7 @@ public:
 	// 현재는 public에 있는데 다른곳으로 이동 시킬듯
 	// 아이템 오버랩시 호출함 함수
 	// UI 띄워주기, 캐릭터 상호작용 활성화 시키기 -> 이거 맞나?
-	UFUNCTION()
-	void OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
-
-	// 오버랩이 끝났을때 호출할 함수
-	UFUNCTION()
-	void OnItemEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -81,7 +71,7 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
-	void Interact(AActor* InInteractor);
+	void Interact();
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
@@ -105,7 +95,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UCameraComponent> Camera;
 
+	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Interact, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UPHInteractComponent> InteractComponent;
+
 protected:
 	// Stores binding functions matched to input action enum
-	TMap<ECharacterActionType, void (APHPlayableCharacter::*)(const FInputActionValue&)> ActionMapping;
+	//TMap<ECharacterActionType, TFunction<void(const FInputActionValue&)>> ActionMapping;
+
+	UPROPERTY(EditAnywhere, BLueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, BLueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UInputAction> InteractAction;
 };

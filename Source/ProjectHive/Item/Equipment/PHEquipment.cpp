@@ -9,3 +9,8 @@ APHEquipment::APHEquipment()
 	EquipmentMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EquipmentMesh"));
 	EquipmentMesh->SetupAttachment(RootComponent);
 }
+
+void APHEquipment::OnPickup()
+{
+	EquipmentMesh->SetRelativeTransform(FTransform::Identity);
+}

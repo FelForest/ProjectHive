@@ -2,7 +2,6 @@
 
 
 #include "Weapon/PHWeaponComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values for this component's properties
 UPHWeaponComponent::UPHWeaponComponent()

@@ -23,5 +23,16 @@ class PROJECTHIVE_API IPHInteractableInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION()
-	virtual void Interact() = 0;
+
+	IPHInteractableInterface() = default;
+
+	virtual void Interact(class AActor* InstigatorActor) = 0;
+
+	// 이 함수는 위젯 컴퍼넌트가 있다는 전제하에 구현을 하는것입니다.
+	// 적을 이유가 있나 싶긴하데 모르겠다
+	UFUNCTION()
+	virtual void ShowInteractUI() = 0;
+
+	UFUNCTION()
+	virtual void HideInteractUI() = 0;
 };

@@ -12,7 +12,7 @@
 * Date : 2025-05-26
 * 
 * Description : Item 클래스
-*				기본적인 획득이 가능한 
+*				기본적인 획득이 가능한 클래스
 * 
 */
 
@@ -27,18 +27,19 @@ public:
 	APHItem();
 
 	// 상호작용 키 활성화용
-	void ShowUI();
+	virtual void ShowInteractUI() override;
+
+	virtual void HideInteractUI() override;
 
 	// 상호작용 인터페이스 구현
-	virtual void Interact() override;
+	virtual void Interact(class AActor* InInstigatorActor) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UCapsuleComponent> ItemCollision;
 
-	//UPROPERTY()
-	//TObjectPtr<
-
+	UPROPERTY()
+	TObjectPtr<class UWidgetComponent> InteractWidget;
 public:	
 	
 };
