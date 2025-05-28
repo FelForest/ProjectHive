@@ -29,8 +29,6 @@ void UPHInteractComponent::Interact()
 
 void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// 오버랩 된거라고 델리게이트 방송할거임
-	
 	// 일단 고민만 한걸로 하고 먼저 싱글로
 	IPHInteractableInterface* Interactable = Cast<IPHInteractableInterface>(OtherActor);
 
@@ -40,43 +38,54 @@ void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* Overl
 		return;
 	}
 	
-	// 이건 서버에서 설정
-	CanInteract = true;
+	if (GetOwner()->HasAuthority())
+	{
+		CanInteract = true;
+	}
 
-	// TODO : 오버랩이 여러개 되면 배열로 찾아야함
+	// 배열에 추가후 현재 UI 띄우는 타겟 설정
+	Targets.Add(OtherActor);
+	Target = Targets[0];
 
-	// Target에 넣기
-	Target = OtherActor;
-
-	// UI에게 알리기 위한 델리게이트
-	// 현재는 먼저 들어온 순서대로 UI 띄워주는 방법으로 하는중
-	// 컨트롤러가 바인딩 할거임 -> 캐릭터에서 시켜줌
-	// 고려사항, 거리로 하는 방법
-
-	// 처음 인경우와 이전 액터랑 같은 액터인지 확인해서 같으거면 델리게이트 막기
-	OnInteractTargetOn.ExecuteIfBound(Target);
-	
+	// 이전 타겟이 현재 타겟이랑 다르면 UI 생성 및 이전 타겟 갱신
+	// 여기서 이전 타겟이 nullptr인 경우에도 가능
+	if (PreviousTarget != Target)
+	{
+		OnInteractTargetOn.ExecuteIfBound(Target);
+		PreviousTarget = Target;
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("InteractActorBeginOverLap"));
 }
 void UPHInteractComponent::OnInteractableEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// 클라
-	// UI에게 딜리게이트로 알려주기
-	// TODO : 배열이없다고 판단이 되면 그때 nullptr 넘겨주는 방식으로 변경
-	// 지금은 테스트용으로 하나만 하는 경우
-	OnInteractTargetOff.ExecuteIfBound(Target);
-	Target = nullptr;
-	
 	// 서버
 	// 상호작용 액션 가능 값을 false로 변경
-	CanInteract = false;
 
-	// 상호작용 안하는 것이 되어서 배열에서 제거
-	// Remove는 배열의 요소를 앞으로 당김
-	// 요소 이동으로 인한 손해가 많은가 생각했는데 몇개 없고, 포인터여서 상관 없는듯
+	// 범위 벗어난 액터가 현재 UI띄워주고 있는 객체인지 확인 후 UI 갱신
+	if (Target == OtherActor)
+	{
+		OnInteractTargetOff.ExecuteIfBound(OtherActor);
+	}
 
-	// 이게 현재 Target 인지 확인해서 삭제해 줘야함
+	// 삭제시 요소들이 앞으로 당겨져 오도록 되어 있는데 실제 인게임의 갯수는 많아도 8개가 끝임
+	Targets.Remove(OtherActor);
+	
+	// 현재 배열의 크기를 확인 후, 다음 타겟이 있으면 UI 호출 아니면 초기화
+	if (Targets.Num() > 0)
+	{
+		Target = Targets[0];
+		OnInteractTargetOn.ExecuteIfBound(Target);
+		PreviousTarget = Target;
+	}
+	else
+	{
+		PreviousTarget = nullptr;
+		if (GetOwner()->HasAuthority())
+		{
+			CanInteract = false;
+		}
+	}
 
 	UE_LOG(LogTemp, Log, TEXT("InteractActorEndOverLap"));
 }

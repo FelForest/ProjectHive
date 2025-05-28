@@ -22,7 +22,6 @@ APHItem::APHItem()
 	static ConstructorHelpers::FClassFinder<UPHInteractWidget> InteractWidgetRef(TEXT("/Game/ProjectHive/UI/WBP_Interact.WBP_Interact_C"));
 	if (InteractWidgetRef.Class)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Tlqkf"));
 		// 위젯 컴포넌트는 위젯의 클래스 정보를 바탕으로 자체적으로 인스턴스를 생성함
 		InteractWidget->SetWidgetClass(InteractWidgetRef.Class);
 

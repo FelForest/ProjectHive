@@ -13,5 +13,7 @@ UCLASS()
 class PROJECTHIVE_API APHWeapon : public APHEquipment
 {
 	GENERATED_BODY()
-	
+
+public:
+	APHWeapon();
 };

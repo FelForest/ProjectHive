@@ -22,8 +22,9 @@
 // Item Including Section
 #include "Item/PHItem.h"
 #include "Item/Equipment/PHEquipment.h"
+#include "Item/Equipment/Weapon/PHWeapon.h"
 
-#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 
 // 임시용
 #include "Player/PHPlayerController.h"
@@ -55,6 +56,7 @@ APHPlayableCharacter::APHPlayableCharacter()
 		CharacterInputActionData = CharacterInputActionDataRef.Object;
 	}
 
+	SetReplicates(true);
 	// Setting InputAction
 	MoveAction = CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction;
 	InteractAction = CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction;
@@ -76,33 +78,31 @@ APHPlayableCharacter::APHPlayableCharacter()
 	// Setting InteractComponent
 	InteractComponent = CreateDefaultSubobject<UPHInteractComponent>(TEXT("InteractComponent"));
 
-	//// Setting Action
-	//ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
-	//// TODO : Interactable 인터페이스 만들어진 후
-	//ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
+	// Setting InteractTrigger
+	InteractTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("InteractTrigger"));
+	InteractTrigger->SetupAttachment(RootComponent);
+	InteractTrigger->SetCollisionProfileName(TEXT("Interaction"));
+	// TODO : 매직넘버 데이터로 받아오기
+	InteractTrigger->SetSphereRadius(98.5f);
+
+	// Setting Action
+	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
+	// TODO : Interactable 인터페이스 만들어진 후
+	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
 }
 
 void APHPlayableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CharacterInputActionData != nullptr)
-	{
-		DefaultMappingContext = CharacterInputActionData->CharacterInputMapping;
-	}
-
-	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	{
-		SubSystem->ClearAllMappings();
-		SubSystem->AddMappingContext(DefaultMappingContext, 0);
-	}
-
 	APHPlayerController* PHPlayerController = Cast<APHPlayerController>(GetController());
+	if (PHPlayerController)
+	{
+		EnableInput(PHPlayerController);
+	}
 
 	if (PHPlayerController != nullptr)
 	{
-		UE_LOG(LogTemp, Log, TEXT("PlayerController Possess"));
 		InteractComponent->OnInteractTargetOn.BindUObject(PHPlayerController, &APHPlayerController::ShowInteractUI);
 		InteractComponent->OnInteractTargetOff.BindUObject(PHPlayerController, &APHPlayerController::HideInteractUI);
 	}
@@ -112,6 +112,8 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	SetMappingContext();
+
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
 	BindInputAction(EnhancedInputComponent);
@@ -119,12 +121,7 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
 {
-	if (CharacterInputActionData == nullptr)
-	{
-		return;
-	}
-
-	/*
+	
 	for (const auto& pair : CharacterInputActionData->InputBindings)
 	{
 		auto ActionType = pair.Key;
@@ -140,11 +137,9 @@ void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedIn
 			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
 		}
 	}
-	*/
-
-
 	
-	InEnhancedInputComponent->BindAction(
+
+	/*InEnhancedInputComponent->BindAction(
 		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction, 
 		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].TriggerEvent,
 		this, &APHPlayableCharacter::Move);
@@ -152,8 +147,8 @@ void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedIn
 	InEnhancedInputComponent->BindAction(
 		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].InputAction,
 		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].TriggerEvent,
-		this, &APHPlayableCharacter::Interact);
-
+		this, &APHPlayableCharacter::Interact);*/
+	
 }
 
 void APHPlayableCharacter::Move(const FInputActionValue& Value)
@@ -181,12 +176,32 @@ void APHPlayableCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(MoveDirection, MovementVectorSize);
 }
 
-void APHPlayableCharacter::Interact()
+void APHPlayableCharacter::Interact(const FInputActionValue& Value)
 {
 	if (InteractComponent != nullptr)
 	{	
 		// 서버 RPC
 		InteractComponent->Interact();
+	}
+}
+
+void APHPlayableCharacter::SetMappingContext()
+{
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (CharacterInputActionData != nullptr)
+	{
+		DefaultMappingContext = CharacterInputActionData->CharacterInputMapping;
+	}
+
+	APHPlayerController* PHPlayerController = CastChecked<APHPlayerController>(GetController());
+	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PHPlayerController->GetLocalPlayer()))
+	{
+		SubSystem->ClearAllMappings();
+		SubSystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 }
 
@@ -235,13 +250,18 @@ void APHPlayableCharacter::PostInitializeComponents()
 
 	WeaponComponent->InitializeWeaponMesh(GetMesh());
 
-	UCapsuleComponent* Trigger = Cast<UCapsuleComponent>(RootComponent);
+	// Setting Interact Overlap Delegate
+	InteractTrigger->OnComponentBeginOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableBeginOverlap);
+	InteractTrigger->OnComponentEndOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableEndOverlap);
+}
 
-	if (Trigger != nullptr)
-	{
-		Trigger->OnComponentBeginOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableBeginOverlap);
-		Trigger->OnComponentEndOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableEndOverlap);
-	}
+void APHPlayableCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	
+
+	
 }
 
 

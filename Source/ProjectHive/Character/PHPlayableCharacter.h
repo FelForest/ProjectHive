@@ -31,8 +31,7 @@ DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
  * 
  */
 UCLASS()
-class PROJECTHIVE_API APHPlayableCharacter : 
-	public APHPartsCharacter,
+class PROJECTHIVE_API APHPlayableCharacter : public APHPartsCharacter,
 	public IPHAttackInterface,
 	public IPHItemInterface
 {
@@ -58,6 +57,9 @@ public:
 	// Called after all components have been initialized
 	virtual void PostInitializeComponents() override;
 
+	// 컨트롤러가 빙의할 때 호출하는 함수
+	virtual void PossessedBy(AController* NewController) override;
+
 	// 현재는 public에 있는데 다른곳으로 이동 시킬듯
 	// 아이템 오버랩시 호출함 함수
 	// UI 띄워주기, 캐릭터 상호작용 활성화 시키기 -> 이거 맞나?
@@ -71,7 +73,9 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 
-	void Interact();
+	void Interact(const FInputActionValue& Value);
+
+	void SetMappingContext();
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
@@ -98,13 +102,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Interact, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UPHInteractComponent> InteractComponent;
 
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Interact, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class USphereComponent> InteractTrigger;
+
 protected:
 	// Stores binding functions matched to input action enum
-	//TMap<ECharacterActionType, TFunction<void(const FInputActionValue&)>> ActionMapping;
+	TMap<ECharacterActionType, void (APHPlayableCharacter::*)(const FInputActionValue&)> ActionMapping;
 
 	UPROPERTY(EditAnywhere, BLueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UInputAction> MoveAction;
 
 	UPROPERTY(EditAnywhere, BLueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UInputAction> InteractAction;
+
+	
 };

@@ -3,3 +3,7 @@
 
 #include "Item/Equipment/Weapon/PHWeapon.h"
 
+APHWeapon::APHWeapon()
+{
+
+}

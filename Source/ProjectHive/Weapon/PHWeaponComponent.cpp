@@ -2,6 +2,7 @@
 
 
 #include "Weapon/PHWeaponComponent.h"
+#include "Item/Equipment/Weapon/PHWeapon.h"
 
 // Sets default values for this component's properties
 UPHWeaponComponent::UPHWeaponComponent()
