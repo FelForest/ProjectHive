@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,11 +6,11 @@
 #include "Components/ActorComponent.h"
 #include "PHInteractComponent.generated.h"
 
-// Àü¹æ ¼±¾ğ
+// ì „ë°© ì„ ì–¸
 class IPHInteractableInterface;
 
-// »óÈ£ÀÛ¿ë °¡´ÉÇÑ ¾×ÅÍ ¿À¹ö·¦ µÆ´Ù°í »ç¿ëÇÒ µ¨¸®°ÔÀÌÆ®
-// ÀÌ°Ç ÄÁÆ®·Ñ·¯(UI) ¿¡¼­¸¸ ¹ÙÀÎµù -> ÃßÈÄ È®ÀåÀ» À§ÇØ º¯°æ °¡´É
+// ìƒí˜¸ì‘ìš© ê°€ëŠ¥í•œ ì•¡í„° ì˜¤ë²„ë© ëë‹¤ê³  ì‚¬ìš©í•  ë¸ë¦¬ê²Œì´íŠ¸
+// ì´ê±´ ì»¨íŠ¸ë¡¤ëŸ¬(UI) ì—ì„œë§Œ ë°”ì¸ë”© -> ì¶”í›„ í™•ì¥ì„ ìœ„í•´ ë³€ê²½ ê°€ëŠ¥
 DECLARE_DELEGATE_OneParam(FOnInteractTargetOnDelegate, AActor* /*NewTarget*/);
 DECLARE_DELEGATE_OneParam(FOnInteractTargetOffDelegate, AActor* /*NewTarget*/);
 
@@ -33,7 +33,7 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	// ¿À¹ö·¦ÀÌ ³¡³µÀ»¶§ È£ÃâÇÒ ÇÔ¼ö
+	// ì˜¤ë²„ë©ì´ ëë‚¬ì„ë•Œ í˜¸ì¶œí•  í•¨ìˆ˜
 	UFUNCTION()
 	void OnInteractableEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
@@ -44,14 +44,14 @@ public:
 	FOnInteractTargetOffDelegate OnInteractTargetOff;
 
 private:
-	// Ä³½ºÆÃÈÄ »ç¿ëÇÒ »óÈ£ÀÛ¿ë °¡´ÉÇÑ ¾×ÅÍ
+	// ìºìŠ¤íŒ…í›„ ì‚¬ìš©í•  ìƒí˜¸ì‘ìš© ê°€ëŠ¥í•œ ì•¡í„°
 	TObjectPtr<class AActor> Target;
 
-	// ¿À¹ö·¦½Ã UI¸¦ º¯°æÇØ¾ßÇÒÁö ¸»¾Æ¾ß ÇÒÁö ÆÇ´ÜÀ» ÇÏ±âÀ§ÇÑ ÀÌÀü ¾×ÅÍ
+	// ì˜¤ë²„ë©ì‹œ UIë¥¼ ë³€ê²½í•´ì•¼í• ì§€ ë§ì•„ì•¼ í• ì§€ íŒë‹¨ì„ í•˜ê¸°ìœ„í•œ ì´ì „ ì•¡í„°
 	TObjectPtr<class AActor> PreviousTarget;
 
-	// ¿©·¯°³ µé¾î¿ÔÀ» ¶§ Ã³¸®ÇÏ±â À§ÇÑ »óÈ£ÀÛ¿ë °¡´ÉÇÑ ¾×ÅÍ ¹è¿­
-	// Target µû·Î ¾´ ÀÌÀ¯ -> ¹è¿­ ¹üÀ§ ¹ş¾î³ª´Â°Å ¿¹¿ÜÃ³¸®¿ë
+	// ì—¬ëŸ¬ê°œ ë“¤ì–´ì™”ì„ ë•Œ ì²˜ë¦¬í•˜ê¸° ìœ„í•œ ìƒí˜¸ì‘ìš© ê°€ëŠ¥í•œ ì•¡í„° ë°°ì—´
+	// Target ë”°ë¡œ ì“´ ì´ìœ  -> ë°°ì—´ ë²”ìœ„ ë²—ì–´ë‚˜ëŠ”ê±° ì˜ˆì™¸ì²˜ë¦¬ìš©
 	TArray<TObjectPtr<class AActor>> Targets;
 
 	bool CanInteract = false;

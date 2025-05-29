@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -20,7 +20,7 @@ class PROJECTHIVE_API APHEquipment : public APHItem
 public:
 	APHEquipment();
 
-	// Àåºñ Mesh Á¢±ÙÀÚ
+	// ì¥ë¹„ Mesh ì ‘ê·¼ì
 	FORCEINLINE USkeletalMeshComponent* GetEquipmentMesh() const
 	{
 		return EquipmentMesh;
@@ -30,11 +30,11 @@ public:
 	void OnPickup();
 
 protected:
-	// ÀÌ°Íµµ µ¥ÀÌÅÍ¸¦ °¡Á®¿Í¼­ ¼¼ÆÃÇÏ´Â ¹æ½ÄÀÌ ÁÁÀ»°Å °°À½
-	// Àåºñ ¸Ş½Ã, ÇÊ¿ä µ¥ÀÌÅÍ¸¦ °¡Áö°Ô ÇÏ´Â ¹æ½ÄÀ¸·Î ÇÏ´Â°Ô ÁÁÀ»µí
-	// ÇÏÀ§ÀÎ ¹«±â´Â ±âº» µ¥ÀÌÅÍ ¿¡¼Â »ó¼Ó¹Ş¾Æ¼­ È®ÀåÇÏ´Â ¹æ½ÄÀÌ ÁÁÀ»µí
-	// Áö±İÀº ´çÀå È®ÀÎÇÏ±â À§ÇÑ °­ÂüÁ¶
-	// ÀåºñÀÇ ±âº» ¸Ş½Ã
+	// ì´ê²ƒë„ ë°ì´í„°ë¥¼ ê°€ì ¸ì™€ì„œ ì„¸íŒ…í•˜ëŠ” ë°©ì‹ì´ ì¢‹ì„ê±° ê°™ìŒ
+	// ì¥ë¹„ ë©”ì‹œ, í•„ìš” ë°ì´í„°ë¥¼ ê°€ì§€ê²Œ í•˜ëŠ” ë°©ì‹ìœ¼ë¡œ í•˜ëŠ”ê²Œ ì¢‹ì„ë“¯
+	// í•˜ìœ„ì¸ ë¬´ê¸°ëŠ” ê¸°ë³¸ ë°ì´í„° ì—ì…‹ ìƒì†ë°›ì•„ì„œ í™•ì¥í•˜ëŠ” ë°©ì‹ì´ ì¢‹ì„ë“¯
+	// ì§€ê¸ˆì€ ë‹¹ì¥ í™•ì¸í•˜ê¸° ìœ„í•œ ê°•ì°¸ì¡°
+	// ì¥ë¹„ì˜ ê¸°ë³¸ ë©”ì‹œ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<USkeletalMeshComponent> EquipmentMesh;
 };

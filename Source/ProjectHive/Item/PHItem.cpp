@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/PHItem.h"
@@ -22,20 +22,20 @@ APHItem::APHItem()
 	static ConstructorHelpers::FClassFinder<UPHInteractWidget> InteractWidgetRef(TEXT("/Game/ProjectHive/UI/WBP_Interact.WBP_Interact_C"));
 	if (InteractWidgetRef.Class)
 	{
-		// À§Á¬ ÄÄÆ÷³ÍÆ®´Â À§Á¬ÀÇ Å¬·¡½º Á¤º¸¸¦ ¹ÙÅÁÀ¸·Î ÀÚÃ¼ÀûÀ¸·Î ÀÎ½ºÅÏ½º¸¦ »ý¼ºÇÔ
+		// ìœ„ì ¯ ì»´í¬ë„ŒíŠ¸ëŠ” ìœ„ì ¯ì˜ í´ëž˜ìŠ¤ ì •ë³´ë¥¼ ë°”íƒ•ìœ¼ë¡œ ìžì²´ì ìœ¼ë¡œ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ìƒì„±í•¨
 		InteractWidget->SetWidgetClass(InteractWidgetRef.Class);
 
-		// 2D ¸ðµå·Î ±×¸®±â
+		// 2D ëª¨ë“œë¡œ ê·¸ë¦¬ê¸°
 		InteractWidget->SetWidgetSpace(EWidgetSpace::Screen);
 
-		// Å©±â ¼³Á¤
+		// í¬ê¸° ì„¤ì •
 		InteractWidget->SetDrawSize(FVector2D(150.0f, 15.0f));
 
-		// ÄÝ¸®Àü ²ô±â
+		// ì½œë¦¬ì „ ë„ê¸°
 		InteractWidget->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	// È£Ãâ½Ã ¿¡¸¸ ÇØÁÖ´Â°É·Î
+	// í˜¸ì¶œì‹œ ì—ë§Œ í•´ì£¼ëŠ”ê±¸ë¡œ
 	InteractWidget->SetVisibility(false);
 }
 

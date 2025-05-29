@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Player/PHPlayerController.h"
@@ -10,10 +10,10 @@ APHPlayerController::APHPlayerController()
 
 void APHPlayerController::ShowInteractUI(AActor* Target)
 {
-	// TODO : ¸ÖÆ¼¸¦ °í·ÁÇÑ°Í
-	// ·ÎÄÃÀÎÁö È®ÀÎ
-	// ¹Ş¾Æ¿Â ¾×ÅÍ InteractabelÀÎÁö È®ÀÎ
-	// UI È£Ãâ
+	// TODO : ë©€í‹°ë¥¼ ê³ ë ¤í•œê²ƒ
+	// ë¡œì»¬ì¸ì§€ í™•ì¸
+	// ë°›ì•„ì˜¨ ì•¡í„° Interactabelì¸ì§€ í™•ì¸
+	// UI í˜¸ì¶œ
 	if (!IsLocalController())
 	{
 		return;

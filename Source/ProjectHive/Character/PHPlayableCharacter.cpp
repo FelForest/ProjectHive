@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/PHPlayableCharacter.h"
@@ -26,7 +26,7 @@
 
 #include "Components/SphereComponent.h"
 
-// ÀÓ½Ã¿ë
+// ì„ì‹œìš©
 #include "Player/PHPlayerController.h"
 
 
@@ -82,12 +82,12 @@ APHPlayableCharacter::APHPlayableCharacter()
 	InteractTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("InteractTrigger"));
 	InteractTrigger->SetupAttachment(RootComponent);
 	InteractTrigger->SetCollisionProfileName(TEXT("Interaction"));
-	// TODO : ¸ÅÁ÷³Ñ¹ö µ¥ÀÌÅÍ·Î ¹Ş¾Æ¿À±â
+	// TODO : ë§¤ì§ë„˜ë²„ ë°ì´í„°ë¡œ ë°›ì•„ì˜¤ê¸°
 	InteractTrigger->SetSphereRadius(98.5f);
 
 	// Setting Action
 	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
-	// TODO : Interactable ÀÎÅÍÆäÀÌ½º ¸¸µé¾îÁø ÈÄ
+	// TODO : Interactable ì¸í„°í˜ì´ìŠ¤ ë§Œë“¤ì–´ì§„ í›„
 	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
 }
 
@@ -180,7 +180,7 @@ void APHPlayableCharacter::Interact(const FInputActionValue& Value)
 {
 	if (InteractComponent != nullptr)
 	{	
-		// ¼­¹ö RPC
+		// ì„œë²„ RPC
 		InteractComponent->Interact();
 	}
 }
@@ -205,20 +205,20 @@ void APHPlayableCharacter::SetMappingContext()
 	}
 }
 
-// ÀÌ°Íµµ ÄÄÆ÷³ÍÆ®·Î Á¶°³¾ß ÇÒµí
+// ì´ê²ƒë„ ì»´í¬ë„ŒíŠ¸ë¡œ ì¡°ê°œì•¼ í• ë“¯
 void APHPlayableCharacter::SetEquipment(APHEquipment* InEquipment)
 {
-	// Àåºñ¸¦ Ä³¸¯ÅÍÀÇ SkeletalComponent¿¡ ºÙÀÌ±â
-	//	¾Ö´Ï¸ŞÀÌ¼Ç µ¿±âÈ­¸¦ À§ÇÑ ¼¼ÆÃ
+	// ì¥ë¹„ë¥¼ ìºë¦­í„°ì˜ SkeletalComponentì— ë¶™ì´ê¸°
+	//	ì• ë‹ˆë©”ì´ì…˜ ë™ê¸°í™”ë¥¼ ìœ„í•œ ì„¸íŒ…
 	InEquipment->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	InEquipment->GetEquipmentMesh()->SetLeaderPoseComponent(GetMesh());
 	InEquipment->OnPickup();
 	//WeaponMesh->SetSkeletalMesh()
-	// ¿©±â¼­ µ¨¸®°ÔÀÌÆ® ÇÏ´Â°Ô ¸ÂÀ½
-	// Àåºñ ½ºÄÌ·¹Åæ ¸Ş½Ãµµ ¿©±â¼­ ÇÏ´Â°Ô ¸Â´Âµí
+	// ì—¬ê¸°ì„œ ë¸ë¦¬ê²Œì´íŠ¸ í•˜ëŠ”ê²Œ ë§ìŒ
+	// ì¥ë¹„ ìŠ¤ì¼ˆë ˆí†¤ ë©”ì‹œë„ ì—¬ê¸°ì„œ í•˜ëŠ”ê²Œ ë§ëŠ”ë“¯
 	if (WeaponComponent != nullptr)
 	{
-		// ÆÄ¶ó¹ÌÅÍ·Î InEquipment ³Ñ°ÜÁà¾ßÇÔ
+		// íŒŒë¼ë¯¸í„°ë¡œ InEquipment ë„˜ê²¨ì¤˜ì•¼í•¨
 		WeaponComponent->SetWeapon();
 	}
 }
@@ -233,10 +233,11 @@ void APHPlayableCharacter::Attack()
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
 {
-	// ÄÚµå ´Ü¿¡¼­ ÇÏ´Â°Ô ¸Â´ÂÁö ¿£Áø´Ü¿¡¼­ È®ÀÎÇÏ´Â°Ô ¸Â´ÂÁö ¸ğ¸£°ÚÀ½
-	// ÇöÀç´Â ¹«±â³ª Àåºñ ÀÌ·±°Ô Å©°Ô ¾øÀ» °ÍÀ¸·Î ÆÇ´ÜÀÌ µÊ
+	// ì½”ë“œ ë‹¨ì—ì„œ í•˜ëŠ”ê²Œ ë§ëŠ”ì§€ ì—”ì§„ë‹¨ì—ì„œ í™•ì¸í•˜ëŠ”ê²Œ ë§ëŠ”ì§€ ëª¨ë¥´ê² ìŒ
+	// í˜„ì¬ëŠ” ë¬´ê¸°ë‚˜ ì¥ë¹„ ì´ëŸ°ê²Œ í¬ê²Œ ì—†ì„ ê²ƒìœ¼ë¡œ íŒë‹¨ì´ ë¨
 
-	// Àåºñ °¡´ÉÇÑ ¾ÆÀÌÅÛÀÎÁö ¾Æ´ÑÁö ÆÇ´Ü
+	// CONSIDER : ì•„ì´í…œ íƒ€ì…ì´ ë§ì•„ì§€ë©´ ì»´í¬ë„ŒíŠ¸ë¡œ ìª¼ê°œê¸° ê³ ë ¤
+	// ì¥ë¹„ ê°€ëŠ¥í•œ ì•„ì´í…œì¸ì§€ ì•„ë‹Œì§€ íŒë‹¨
 	APHEquipment* Equipment = Cast<APHEquipment>(InItem);
 	if (Equipment != nullptr)
 	{

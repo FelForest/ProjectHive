@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/PHInteractComponent.h"
@@ -29,10 +29,10 @@ void UPHInteractComponent::Interact()
 
 void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// ÀÏ´Ü °í¹Î¸¸ ÇÑ°É·Î ÇÏ°í ¸ÕÀú ½Ì±Û·Î
+	// ì¼ë‹¨ ê³ ë¯¼ë§Œ í•œê±¸ë¡œ í•˜ê³  ë¨¼ì € ì‹±ê¸€ë¡œ
 	IPHInteractableInterface* Interactable = Cast<IPHInteractableInterface>(OtherActor);
 
-	// ¿£Áø ´Ü¿¡¼­ È®ÀÎÀº ÇÏÁö¸¸ È¤½Ã³ª ÇØ¼­ È®ÀÎ -> ´ëºÎºĞ ÈŞ¸Õ ¿À·ù
+	// ì—”ì§„ ë‹¨ì—ì„œ í™•ì¸ì€ í•˜ì§€ë§Œ í˜¹ì‹œë‚˜ í•´ì„œ í™•ì¸ -> ëŒ€ë¶€ë¶„ íœ´ë¨¼ ì˜¤ë¥˜
 	if (Interactable == nullptr)
 	{
 		return;
@@ -43,12 +43,12 @@ void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* Overl
 		CanInteract = true;
 	}
 
-	// ¹è¿­¿¡ Ãß°¡ÈÄ ÇöÀç UI ¶ç¿ì´Â Å¸°Ù ¼³Á¤
+	// ë°°ì—´ì— ì¶”ê°€í›„ í˜„ì¬ UI ë„ìš°ëŠ” íƒ€ê²Ÿ ì„¤ì •
 	Targets.Add(OtherActor);
 	Target = Targets[0];
 
-	// ÀÌÀü Å¸°ÙÀÌ ÇöÀç Å¸°ÙÀÌ¶û ´Ù¸£¸é UI »ı¼º ¹× ÀÌÀü Å¸°Ù °»½Å
-	// ¿©±â¼­ ÀÌÀü Å¸°ÙÀÌ nullptrÀÎ °æ¿ì¿¡µµ °¡´É
+	// ì´ì „ íƒ€ê²Ÿì´ í˜„ì¬ íƒ€ê²Ÿì´ë‘ ë‹¤ë¥´ë©´ UI ìƒì„± ë° ì´ì „ íƒ€ê²Ÿ ê°±ì‹ 
+	// ì—¬ê¸°ì„œ ì´ì „ íƒ€ê²Ÿì´ nullptrì¸ ê²½ìš°ì—ë„ ê°€ëŠ¥
 	if (PreviousTarget != Target)
 	{
 		OnInteractTargetOn.ExecuteIfBound(Target);
@@ -59,19 +59,19 @@ void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* Overl
 }
 void UPHInteractComponent::OnInteractableEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// ¼­¹ö
-	// »óÈ£ÀÛ¿ë ¾×¼Ç °¡´É °ªÀ» false·Î º¯°æ
+	// ì„œë²„
+	// ìƒí˜¸ì‘ìš© ì•¡ì…˜ ê°€ëŠ¥ ê°’ì„ falseë¡œ ë³€ê²½
 
-	// ¹üÀ§ ¹ş¾î³­ ¾×ÅÍ°¡ ÇöÀç UI¶ç¿öÁÖ°í ÀÖ´Â °´Ã¼ÀÎÁö È®ÀÎ ÈÄ UI °»½Å
+	// ë²”ìœ„ ë²—ì–´ë‚œ ì•¡í„°ê°€ í˜„ì¬ UIë„ì›Œì£¼ê³  ìˆëŠ” ê°ì²´ì¸ì§€ í™•ì¸ í›„ UI ê°±ì‹ 
 	if (Target == OtherActor)
 	{
 		OnInteractTargetOff.ExecuteIfBound(OtherActor);
 	}
 
-	// »èÁ¦½Ã ¿ä¼ÒµéÀÌ ¾ÕÀ¸·Î ´ç°ÜÁ® ¿Àµµ·Ï µÇ¾î ÀÖ´Âµ¥ ½ÇÁ¦ ÀÎ°ÔÀÓÀÇ °¹¼ö´Â ¸¹¾Æµµ 8°³°¡ ³¡ÀÓ
+	// ì‚­ì œì‹œ ìš”ì†Œë“¤ì´ ì•ìœ¼ë¡œ ë‹¹ê²¨ì ¸ ì˜¤ë„ë¡ ë˜ì–´ ìˆëŠ”ë° ì‹¤ì œ ì¸ê²Œì„ì˜ ê°¯ìˆ˜ëŠ” ë§ì•„ë„ 8ê°œê°€ ëì„
 	Targets.Remove(OtherActor);
 	
-	// ÇöÀç ¹è¿­ÀÇ Å©±â¸¦ È®ÀÎ ÈÄ, ´ÙÀ½ Å¸°ÙÀÌ ÀÖÀ¸¸é UI È£Ãâ ¾Æ´Ï¸é ÃÊ±âÈ­
+	// í˜„ì¬ ë°°ì—´ì˜ í¬ê¸°ë¥¼ í™•ì¸ í›„, ë‹¤ìŒ íƒ€ê²Ÿì´ ìˆìœ¼ë©´ UI í˜¸ì¶œ ì•„ë‹ˆë©´ ì´ˆê¸°í™”
 	if (Targets.Num() > 0)
 	{
 		Target = Targets[0];

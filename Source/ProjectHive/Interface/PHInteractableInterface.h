@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -25,8 +25,8 @@ public:
 	UFUNCTION()
 	virtual void Interact(class AActor* InstigatorActor) = 0;
 
-	// ÀÌ ÇÔ¼ö´Â À§Á¬ ÄÄÆÛ³ÍÆ®°¡ ÀÖ´Ù´Â ÀüÁ¦ÇÏ¿¡ ±¸ÇöÀ» ÇÏ´Â°ÍÀÔ´Ï´Ù.
-	// ÀûÀ» ÀÌÀ¯°¡ ÀÖ³ª ½Í±äÇÏµ¥ ¸ğ¸£°Ú´Ù
+	// ì´ í•¨ìˆ˜ëŠ” ìœ„ì ¯ ì»´í¼ë„ŒíŠ¸ê°€ ìˆë‹¤ëŠ” ì „ì œí•˜ì— êµ¬í˜„ì„ í•˜ëŠ”ê²ƒì…ë‹ˆë‹¤.
+	// ì ì„ ì´ìœ ê°€ ìˆë‚˜ ì‹¶ê¸´í•˜ë° ëª¨ë¥´ê² ë‹¤
 	UFUNCTION()
 	virtual void ShowInteractUI() = 0;
 

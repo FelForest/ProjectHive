@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -8,11 +8,11 @@
 #include "PHItem.generated.h"
 
 /*
-* Author : ÀÓµ¿Çö
+* Author : ì„ë™í˜„
 * Date : 2025-05-26
 * 
-* Description : Item Å¬·¡½º
-*				±âº»ÀûÀÎ È¹µæÀÌ °¡´ÉÇÑ Å¬·¡½º
+* Description : Item í´ë˜ìŠ¤
+*				ê¸°ë³¸ì ì¸ íšë“ì´ ê°€ëŠ¥í•œ í´ë˜ìŠ¤
 * 
 */
 
@@ -26,12 +26,12 @@ public:
 	// Sets default values for this actor's properties
 	APHItem();
 
-	// »óÈ£ÀÛ¿ë Å° È°¼ºÈ­¿ë
+	// ìƒí˜¸ì‘ìš© í‚¤ í™œì„±í™”ìš©
 	virtual void ShowInteractUI() override;
 
 	virtual void HideInteractUI() override;
 
-	// »óÈ£ÀÛ¿ë ÀÎÅÍÆäÀÌ½º ±¸Çö
+	// ìƒí˜¸ì‘ìš© ì¸í„°í˜ì´ìŠ¤ êµ¬í˜„
 	virtual void Interact(class AActor* InInstigatorActor) override;
 
 protected:

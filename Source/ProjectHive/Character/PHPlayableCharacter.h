@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,16 +18,16 @@
 DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
 
 /**
- * Author		: ÀÓµ¿Çö
+ * Author		: ì„ë™í˜„
  * Date			: 2025-05-06
  * Description	:
- * Å¬¶óÀÌ¾ğÆ®
- *	ÀÔ·Â 
- *	¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı
+ * í´ë¼ì´ì–¸íŠ¸
+ *	ì…ë ¥ 
+ *	ì• ë‹ˆë©”ì´ì…˜ ì¬ìƒ
  *	
- * ¼­¹ö
- * °ø°İ ÆÇÁ¤
- * ¾ÆÀÌÅÛ È¹µæ
+ * ì„œë²„
+ * ê³µê²© íŒì •
+ * ì•„ì´í…œ íšë“
  * 
  */
 UCLASS()
@@ -44,7 +44,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Delegate Section
-	// ¹«±âµç Àåºñµç »ó°ü ¾øÀÌ ±×³É UI´Â ÀÌ¹ÌÁö¶û ½ºÅÈ ¾÷µ¥ÀÌÆ® ÇÏ¸é µÇ´Â°Å ¾Æ´Ñ°¡..
+	// ë¬´ê¸°ë“  ì¥ë¹„ë“  ìƒê´€ ì—†ì´ ê·¸ëƒ¥ UIëŠ” ì´ë¯¸ì§€ë‘ ìŠ¤íƒ¯ ì—…ë°ì´íŠ¸ í•˜ë©´ ë˜ëŠ”ê±° ì•„ë‹Œê°€..
 	void SetEquipment(class APHEquipment* InEquipment);
 
 	// AttackInterface
@@ -57,12 +57,12 @@ public:
 	// Called after all components have been initialized
 	virtual void PostInitializeComponents() override;
 
-	// ÄÁÆ®·Ñ·¯°¡ ºùÀÇÇÒ ¶§ È£ÃâÇÏ´Â ÇÔ¼ö
+	// ì»¨íŠ¸ë¡¤ëŸ¬ê°€ ë¹™ì˜í•  ë•Œ í˜¸ì¶œí•˜ëŠ” í•¨ìˆ˜
 	virtual void PossessedBy(AController* NewController) override;
 
-	// ÇöÀç´Â public¿¡ ÀÖ´Âµ¥ ´Ù¸¥°÷À¸·Î ÀÌµ¿ ½ÃÅ³µí
-	// ¾ÆÀÌÅÛ ¿À¹ö·¦½Ã È£ÃâÇÔ ÇÔ¼ö
-	// UI ¶ç¿öÁÖ±â, Ä³¸¯ÅÍ »óÈ£ÀÛ¿ë È°¼ºÈ­ ½ÃÅ°±â -> ÀÌ°Å ¸Â³ª?
+	// í˜„ì¬ëŠ” publicì— ìˆëŠ”ë° ë‹¤ë¥¸ê³³ìœ¼ë¡œ ì´ë™ ì‹œí‚¬ë“¯
+	// ì•„ì´í…œ ì˜¤ë²„ë©ì‹œ í˜¸ì¶œí•¨ í•¨ìˆ˜
+	// UI ë„ì›Œì£¼ê¸°, ìºë¦­í„° ìƒí˜¸ì‘ìš© í™œì„±í™” ì‹œí‚¤ê¸° -> ì´ê±° ë§ë‚˜?
 	
 
 protected:
