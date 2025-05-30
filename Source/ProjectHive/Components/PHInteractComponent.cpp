@@ -54,8 +54,6 @@ void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* Overl
 		OnInteractTargetOn.ExecuteIfBound(Target);
 		PreviousTarget = Target;
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("InteractActorBeginOverLap"));
 }
 void UPHInteractComponent::OnInteractableEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
@@ -86,7 +84,5 @@ void UPHInteractComponent::OnInteractableEndOverlap(UPrimitiveComponent* Overlap
 			CanInteract = false;
 		}
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("InteractActorEndOverLap"));
 }
 

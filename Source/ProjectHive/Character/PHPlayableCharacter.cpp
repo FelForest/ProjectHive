@@ -3,9 +3,7 @@
 
 #include "Character/PHPlayableCharacter.h"
 
-#include "Weapon/PHWeaponComponent.h"
-//#include "Components/SkeletalMeshComponent.h"
-
+// Camera Setction
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -22,8 +20,15 @@
 // Item Including Section
 #include "Item/PHItem.h"
 #include "Item/Equipment/PHEquipment.h"
-#include "Item/Equipment/Weapon/PHWeapon.h"
 
+// Equipment Section
+#include "Weapon/PHWeaponComponent.h"
+#include "Components/PHEquipmentComponent.h"
+
+// Stat Section
+#include "Components/PHCharacterStatComponent.h"
+
+// OverLap Section
 #include "Components/SphereComponent.h"
 
 // 임시용
@@ -35,6 +40,9 @@ APHPlayableCharacter::APHPlayableCharacter()
 {
 	// Setting Weapon 
 	WeaponComponent = CreateDefaultSubobject<UPHWeaponComponent>(TEXT("WeaponComponent"));
+
+	// Setting Equipment
+	EquipmentComponent = CreateDefaultSubobject<UPHEquipmentComponent>(TEXT("EquipmentComponent"));
 
 	// Setting AnimInstance
 	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/ABP_AR.ABP_AR_C"));
@@ -82,7 +90,7 @@ APHPlayableCharacter::APHPlayableCharacter()
 	InteractTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("InteractTrigger"));
 	InteractTrigger->SetupAttachment(RootComponent);
 	InteractTrigger->SetCollisionProfileName(TEXT("Interaction"));
-	// TODO : 매직넘버 데이터로 받아오기
+	// TODO : 매직넘버 데이터로 받아오기 변경
 	InteractTrigger->SetSphereRadius(98.5f);
 
 	// Setting Action
@@ -208,11 +216,12 @@ void APHPlayableCharacter::SetMappingContext()
 // 이것도 컴포넌트로 조개야 할듯
 void APHPlayableCharacter::SetEquipment(APHEquipment* InEquipment)
 {
+	// TODO : 함수가 하는 일이 많아져서 컴포넌트로 분리 필요 
 	// 장비를 캐릭터의 SkeletalComponent에 붙이기
 	//	애니메이션 동기화를 위한 세팅
 	InEquipment->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	InEquipment->GetEquipmentMesh()->SetLeaderPoseComponent(GetMesh());
-	InEquipment->OnPickup();
+	InEquipment->ResetTransform();
 	//WeaponMesh->SetSkeletalMesh()
 	// 여기서 델리게이트 하는게 맞음
 	// 장비 스켈레톤 메시도 여기서 하는게 맞는듯
@@ -233,15 +242,23 @@ void APHPlayableCharacter::Attack()
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
 {
+	// Item은 타입을 가지고 있어서 그것으로 분기
+	// 컴포넌트에 넘겨줘고 그 타입이라는 믿음 아래에서 시작하는 방식으로 함
+	if (InItem != nullptr)
+	{
+		EquipmentComponent->Equip(InItem, GetMesh());
+	}
+
+	
 	// 코드 단에서 하는게 맞는지 엔진단에서 확인하는게 맞는지 모르겠음
 	// 현재는 무기나 장비 이런게 크게 없을 것으로 판단이 됨
+	
 
-	// CONSIDER : 아이템 타입이 많아지면 컴포넌트로 쪼개기 고려
 	// 장비 가능한 아이템인지 아닌지 판단
 	APHEquipment* Equipment = Cast<APHEquipment>(InItem);
 	if (Equipment != nullptr)
 	{
-		SetEquipment(Equipment);
+		EquipmentComponent->Equip(Equipment, GetMesh());
 	}
 }
 
@@ -251,9 +268,15 @@ void APHPlayableCharacter::PostInitializeComponents()
 
 	WeaponComponent->InitializeWeaponMesh(GetMesh());
 
+	// Setting EquipmentSlots
+	EquipmentComponent->SetEquipmentSlot();
+
 	// Setting Interact Overlap Delegate
 	InteractTrigger->OnComponentBeginOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableBeginOverlap);
 	InteractTrigger->OnComponentEndOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableEndOverlap);
+
+
+
 }
 
 void APHPlayableCharacter::PossessedBy(AController* NewController)

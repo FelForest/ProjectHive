@@ -51,7 +51,6 @@ void APHItem::HideInteractUI()
 
 void APHItem::Interact(AActor* InInstigatorActor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Begin ItemInteract"));
 	IPHItemInterface* InstigatorActor = Cast<IPHItemInterface>(InInstigatorActor);
 
 	if (InstigatorActor == nullptr)
@@ -62,5 +61,15 @@ void APHItem::Interact(AActor* InInstigatorActor)
 	InstigatorActor->PickupItem(this);
 
 	ItemCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void APHItem::DropItem()
+{
+	ItemCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+USceneComponent* APHItem::GetRootComponent()
+{
+	return RootComponent;
 }
 

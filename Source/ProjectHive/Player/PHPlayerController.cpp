@@ -18,7 +18,6 @@ void APHPlayerController::ShowInteractUI(AActor* Target)
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("Only Client"));
 	IPHInteractableInterface* InteractActor = Cast<IPHInteractableInterface>(Target);
 	if (InteractActor != nullptr)
 	{

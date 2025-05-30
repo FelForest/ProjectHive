@@ -5,5 +5,5 @@
 
 APHWeapon::APHWeapon()
 {
-
+	EquipmentType = EEquipmentType::Weapon;
 }

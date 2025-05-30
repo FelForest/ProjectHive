@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Item/PHItem.h"
+#include "ItemData/PHEquipmentType.h"
 #include "PHEquipment.generated.h"
 
 /**
@@ -27,7 +28,24 @@ public:
 	}
 
 	UFUNCTION()
-	void OnPickup();
+	void ResetTransform();
+
+	UFUNCTION()
+	void OnEquipped();
+
+	UFUNCTION()
+	FORCEINLINE EEquipmentType GetEquipmentType()
+	{
+		return EquipmentType;
+	}
+
+	UFUNCTION()
+	FORCEINLINE FName GetSockName()
+	{
+		return SocketName;
+	}
+
+	virtual void DropItem() override;
 
 protected:
 	// 이것도 데이터를 가져와서 세팅하는 방식이 좋을거 같음
@@ -35,6 +53,12 @@ protected:
 	// 하위인 무기는 기본 데이터 에셋 상속받아서 확장하는 방식이 좋을듯
 	// 지금은 당장 확인하기 위한 강참조
 	// 장비의 기본 메시
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment)
 	TObjectPtr<USkeletalMeshComponent> EquipmentMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipmentype)
+	EEquipmentType EquipmentType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sock)
+	FName SocketName;
 };

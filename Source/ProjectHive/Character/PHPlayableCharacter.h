@@ -11,7 +11,6 @@
 #include "Interface/PHAttackInterface.h"
 #include "Interface/PHItemInterface.h"
 
-
 #include "PHPlayableCharacter.generated.h"
 
 // TODO: Define parameters for equipment delegate
@@ -84,6 +83,14 @@ protected:
 	// Weapon Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<class UPHWeaponComponent> WeaponComponent;
+
+	// Equipment Section
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment)
+	TObjectPtr<class UPHEquipmentComponent> EquipmentComponent;
+
+	// Stat Section
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment)
+	TObjectPtr<class UPHCharacterStatComponent> StatComponent;
 
 	// Input Section
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

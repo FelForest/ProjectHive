@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interface/PHInteractableInterface.h"
+#include "ItemData/PHItemType.h"
 #include "PHItem.generated.h"
 
 /*
@@ -15,6 +16,7 @@
 *				기본적인 획득이 가능한 클래스
 * 
 */
+
 
 UCLASS()
 class PROJECTHIVE_API APHItem : public AActor,
@@ -34,12 +36,22 @@ public:
 	// 상호작용 인터페이스 구현
 	virtual void Interact(class AActor* InInstigatorActor) override;
 
+	UFUNCTION()
+	virtual void DropItem();
+
+	UFUNCTION()
+	USceneComponent* GetRootComponent();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UCapsuleComponent> ItemCollision;
 
 	UPROPERTY()
 	TObjectPtr<class UWidgetComponent> InteractWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=ItemType)
+	EItemType ItemType;
 public:	
+
 	
 };
