@@ -42,10 +42,6 @@ public:
 	// Called when possessed by a player controller to bind input functionality. 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// Delegate Section
-	// 무기든 장비든 상관 없이 그냥 UI는 이미지랑 스탯 업데이트 하면 되는거 아닌가..
-	void SetEquipment(class APHEquipment* InEquipment);
-
 	// AttackInterface
 	virtual void Attack() override;
 
@@ -74,7 +70,15 @@ protected:
 
 	void Interact(const FInputActionValue& Value);
 
+	void DropWeapon(const FInputActionValue& Value);
+
+	void Attack(const FInputActionValue& Value);
+
 	void SetMappingContext();
+
+	
+
+
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;

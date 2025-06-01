@@ -16,4 +16,7 @@ class PROJECTHIVE_API APHWeapon : public APHEquipment
 
 public:
 	APHWeapon();
+
+	UFUNCTION()
+	void Attack();
 };

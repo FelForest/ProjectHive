@@ -16,10 +16,11 @@
 	- 장비 장착 변경 시 델리게이트를 통해 UI 등에 알림
 */
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentEquippedDelegate, const class APHEquipment*);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentUnequippedDelegate, const class APHEquipment*);
-
 class APHEquipment;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentEquippedDelegate, APHEquipment*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentUnequippedDelegate, APHEquipment*);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTHIVE_API UPHEquipmentComponent : public UActorComponent
@@ -37,6 +38,9 @@ public:
 	UFUNCTION()
 	void DropEquipment(APHEquipment* InEquipment);
 
+	/*UFUNCTION()
+	void DropEquipment(class APHItem* InEquipment);*/
+
 	// 무기 슬롯 결정하는 함수 필요 -> 소유주가 할거임 -> 컴포넌트 초기화 보장 이후 해줘야함
 	void SetEquipmentSlot(/*EquipmentTypePreset*/);
 
@@ -45,6 +49,8 @@ public:
 	{
 		AttachMesh = InAttachMesh;
 	}
+
+	//APHEquipment* 
 
 public:	
 	FOnEquipmentEquippedDelegate OnEquipmentEquipped;

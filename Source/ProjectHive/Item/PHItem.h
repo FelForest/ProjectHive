@@ -42,6 +42,12 @@ public:
 	UFUNCTION()
 	USceneComponent* GetRootComponent();
 
+	UFUNCTION()
+	FORCEINLINE EItemType GetItemType()
+	{
+		return ItemType;
+	}
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UCapsuleComponent> ItemCollision;

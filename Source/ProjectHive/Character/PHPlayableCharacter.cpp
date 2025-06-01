@@ -95,8 +95,9 @@ APHPlayableCharacter::APHPlayableCharacter()
 
 	// Setting Action
 	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
-	// TODO : Interactable 인터페이스 만들어진 후
 	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
+	ActionMapping.Add(ECharacterActionType::DropWeapon, &APHPlayableCharacter::DropWeapon);
+	ActionMapping.Add(ECharacterActionType::Attack, &APHPlayableCharacter::Attack);
 }
 
 void APHPlayableCharacter::BeginPlay()
@@ -126,6 +127,16 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	BindInputAction(EnhancedInputComponent);
 }
+
+void APHPlayableCharacter::Attack()
+{
+	if (WeaponComponent != nullptr)
+	{
+		WeaponComponent->Attack();
+	}
+}
+
+
 
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
 {
@@ -193,6 +204,14 @@ void APHPlayableCharacter::Interact(const FInputActionValue& Value)
 	}
 }
 
+void APHPlayableCharacter::DropWeapon(const FInputActionValue& Value)
+{
+	if (APHEquipment* Weapon = WeaponComponent->GetWeapon())
+	{
+		EquipmentComponent->DropEquipment(Weapon);
+	}
+}
+
 void APHPlayableCharacter::SetMappingContext()
 {
 	if (!IsLocallyControlled())
@@ -213,52 +232,23 @@ void APHPlayableCharacter::SetMappingContext()
 	}
 }
 
-// 이것도 컴포넌트로 조개야 할듯
-void APHPlayableCharacter::SetEquipment(APHEquipment* InEquipment)
+void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 {
-	// TODO : 함수가 하는 일이 많아져서 컴포넌트로 분리 필요 
-	// 장비를 캐릭터의 SkeletalComponent에 붙이기
-	//	애니메이션 동기화를 위한 세팅
-	InEquipment->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	InEquipment->GetEquipmentMesh()->SetLeaderPoseComponent(GetMesh());
-	InEquipment->ResetTransform();
-	//WeaponMesh->SetSkeletalMesh()
-	// 여기서 델리게이트 하는게 맞음
-	// 장비 스켈레톤 메시도 여기서 하는게 맞는듯
-	if (WeaponComponent != nullptr)
-	{
-		// 파라미터로 InEquipment 넘겨줘야함
-		WeaponComponent->SetWeapon();
-	}
-}
-
-void APHPlayableCharacter::Attack()
-{
-	if (WeaponComponent != nullptr)
-	{
-		WeaponComponent->Attack();
-	}
+	Attack();
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
 {
 	// Item은 타입을 가지고 있어서 그것으로 분기
 	// 컴포넌트에 넘겨줘고 그 타입이라는 믿음 아래에서 시작하는 방식으로 함
-	if (InItem != nullptr)
+	if (InItem == nullptr)
 	{
-		EquipmentComponent->Equip(InItem, GetMesh());
+		return;
 	}
 
-	
-	// 코드 단에서 하는게 맞는지 엔진단에서 확인하는게 맞는지 모르겠음
-	// 현재는 무기나 장비 이런게 크게 없을 것으로 판단이 됨
-	
-
-	// 장비 가능한 아이템인지 아닌지 판단
-	APHEquipment* Equipment = Cast<APHEquipment>(InItem);
-	if (Equipment != nullptr)
+	if (InItem->GetItemType() == EItemType::Equipment)
 	{
-		EquipmentComponent->Equip(Equipment, GetMesh());
+		EquipmentComponent->Equip(InItem, GetMesh());
 	}
 }
 
@@ -275,17 +265,17 @@ void APHPlayableCharacter::PostInitializeComponents()
 	InteractTrigger->OnComponentBeginOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableBeginOverlap);
 	InteractTrigger->OnComponentEndOverlap.AddDynamic(InteractComponent.Get(), &UPHInteractComponent::OnInteractableEndOverlap);
 
+	// 무기컴포넌트에 알려주기 위한 바인딩
+	EquipmentComponent->OnEquipmentEquipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::SetWeapon);
+	EquipmentComponent->OnEquipmentUnequipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::ClearWeapon);
 
+	// 장비에 대한 UI 바인딩
 
 }
 
 void APHPlayableCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	
-
-	
 }
 
 

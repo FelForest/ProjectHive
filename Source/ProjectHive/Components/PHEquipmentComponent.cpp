@@ -72,6 +72,8 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 	InEquipment->GetEquipmentMesh()->SetLeaderPoseComponent(InOwnerMesh);
 	InEquipment->OnEquipped();
 
+
+
 	// UI 및 스탯 갱신용 델리게이트 발행
 	OnEquipmentEquipped.Broadcast(InEquipment);
 }
@@ -84,10 +86,21 @@ void UPHEquipmentComponent::DropEquipment(APHEquipment* InEquipment)
 	InEquipment->DropItem();
 	// 기존 장비 해제
 	EquipmentSlots[InEquipment->GetEquipmentType()] = nullptr;
-
+	
 	// UI 및 스탯 갱신용 델리게이트 발행
+	// 장비를 넘겨주는 이유는 UI가 어떠한 장비를 해제해야하는지 알아야 하기 때문
 	OnEquipmentUnequipped.Broadcast(InEquipment);
+
 }
+
+//void UPHEquipmentComponent::DropEquipment(APHItem* InEquipment)
+//{
+//	APHEquipment* DroppedEquipment = Cast<APHEquipment>(InEquipment);
+//	if (DroppedEquipment != nullptr)
+//	{
+//		DropEquipment(DroppedEquipment);
+//	}
+//}
 
 // Consider : 지금은 하나의 타입만 있어서 이런데 -> Preset 만들고 나면 분기 처리 해야함
 void UPHEquipmentComponent::SetEquipmentSlot(/*EquipmentTypePreset*/)
