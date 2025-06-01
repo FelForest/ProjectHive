@@ -20,9 +20,9 @@ void APHEquipment::OnEquipped()
 	ResetTransform();
 }
 
-void APHEquipment::DropItem()
+void APHEquipment::DropItem(const FVector& InDropLocation)
 {
-	Super::DropItem();
+	Super::DropItem(InDropLocation);
 
 	// 루트 컴포넌트랑 메시랑 맞지 않아서 조정하기 위한 위치 설정
 	// TODO : 데이터로 받아와야함

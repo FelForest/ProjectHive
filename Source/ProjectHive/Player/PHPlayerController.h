@@ -22,4 +22,10 @@ public:
 
 	UFUNCTION()
 	void HideInteractUI(class AActor* Target);
+
+	UFUNCTION()
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void ShowMouseCursor(bool IsShow);
 };

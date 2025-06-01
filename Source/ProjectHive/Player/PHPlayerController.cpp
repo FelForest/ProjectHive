@@ -39,4 +39,32 @@ void APHPlayerController::HideInteractUI(AActor* Target)
 	}
 }
 
+void APHPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 로컬에서만 마우스 보이게 설정
+	// TODO : 인게임에서는 조준점이 생기면 조준점으로 변경 예정
+	ShowMouseCursor(true);
+}
+
+void APHPlayerController::ShowMouseCursor(bool IsShow)
+{
+	if (IsLocalController())
+	{
+		if (IsShow)
+		{
+			bShowMouseCursor = true;
+			FInputModeGameAndUI InputMode;
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputMode);
+		}
+		else
+		{
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+		}
+	}
+}
+
 

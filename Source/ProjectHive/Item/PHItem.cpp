@@ -13,7 +13,10 @@
 APHItem::APHItem()
 {
 	ItemCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("ItemCollision"));
+	ItemCollision->SetSimulatePhysics(true);
+	ItemCollision->SetCollisionProfileName(TEXT("Interactable"));
 	SetRootComponent(ItemCollision);
+
 
 	InteractWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("InteractUI"));
 	InteractWidget->SetupAttachment(RootComponent);
@@ -58,14 +61,17 @@ void APHItem::Interact(AActor* InInstigatorActor)
 		return;
 	}
 
-	InstigatorActor->PickupItem(this);
-
+	ItemCollision->SetSimulatePhysics(false);
 	ItemCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	InstigatorActor->PickupItem(this);
 }
 
-void APHItem::DropItem()
+void APHItem::DropItem(const FVector& InDropLocation)
 {
-	ItemCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ItemCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ItemCollision->SetSimulatePhysics(true);
+	SetActorLocation(InDropLocation);
 }
 
 USceneComponent* APHItem::GetRootComponent()

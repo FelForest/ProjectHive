@@ -27,7 +27,17 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InEquipment)
 	}
 
 	// Use Delegate to UI
-	Weapon = Cast<APHWeapon>(InEquipment);
+
+	APHWeapon* NewWeapon = Cast<APHWeapon>(InEquipment);
+
+	// 무기가 아니여서 캐스팅 실패
+	if (NewWeapon == nullptr)
+	{
+		return;
+	}
+
+	// 무기 설정
+	Weapon = NewWeapon;
 
 	// 무기가 아니라고 판단
 	if (Weapon == nullptr)

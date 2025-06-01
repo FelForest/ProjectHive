@@ -37,7 +37,7 @@ public:
 	virtual void Interact(class AActor* InInstigatorActor) override;
 
 	UFUNCTION()
-	virtual void DropItem();
+	virtual void DropItem(const FVector& InDropLocation);
 
 	UFUNCTION()
 	USceneComponent* GetRootComponent();

@@ -50,7 +50,8 @@ public:
 		AttachMesh = InAttachMesh;
 	}
 
-	//APHEquipment* 
+	/*UFUNCTION()
+	void SetDropLocation(const FVector& InDropLocation);*/
 
 public:	
 	FOnEquipmentEquippedDelegate OnEquipmentEquipped;
@@ -60,4 +61,6 @@ private:
 	TMap<EEquipmentType, APHEquipment*> EquipmentSlots;
 
 	TObjectPtr<USkeletalMeshComponent> AttachMesh;
+
+	//FVector DropLocation;
 };

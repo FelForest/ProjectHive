@@ -45,7 +45,7 @@ public:
 		return SocketName;
 	}
 
-	virtual void DropItem() override;
+	virtual void DropItem(const FVector& InDropLocation) override;
 
 protected:
 	// 이것도 데이터를 가져와서 세팅하는 방식이 좋을거 같음

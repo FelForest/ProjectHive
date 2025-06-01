@@ -83,7 +83,10 @@ void UPHEquipmentComponent::DropEquipment(APHEquipment* InEquipment)
 	InEquipment->GetRootComponent()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	InEquipment->GetEquipmentMesh()->SetLeaderPoseComponent(nullptr);
 	InEquipment->GetEquipmentMesh()->SetAnimInstanceClass(nullptr);
-	InEquipment->DropItem();
+
+	// TODO : 임시로 떨어지는 위치 설정, 변수로 승격 필요
+	FVector DropLocation = GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * 200.0f;
+	InEquipment->DropItem(DropLocation);
 	// 기존 장비 해제
 	EquipmentSlots[InEquipment->GetEquipmentType()] = nullptr;
 	
@@ -111,5 +114,10 @@ void UPHEquipmentComponent::SetEquipmentSlot(/*EquipmentTypePreset*/)
 		EquipmentSlots.Add(EquipmentType, nullptr);
 	}
 }
+
+//void UPHEquipmentComponent::SetDropLocation(const FVector& InDropLocation)
+//{
+//	DropLocation = InDropLocation;
+//}
 
 

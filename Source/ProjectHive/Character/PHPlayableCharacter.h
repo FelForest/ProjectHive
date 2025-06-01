@@ -74,9 +74,10 @@ protected:
 
 	void Attack(const FInputActionValue& Value);
 
+	void Aim(const FInputActionValue& Value);
+
 	void SetMappingContext();
 
-	
 
 
 
@@ -126,5 +127,6 @@ protected:
 	UPROPERTY(EditAnywhere, BLueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UInputAction> InteractAction;
 
-	
+	UPROPERTY()
+	TObjectPtr<class APHPlayerController> PlayerController;
 };

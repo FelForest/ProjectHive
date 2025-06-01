@@ -98,22 +98,23 @@ APHPlayableCharacter::APHPlayableCharacter()
 	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
 	ActionMapping.Add(ECharacterActionType::DropWeapon, &APHPlayableCharacter::DropWeapon);
 	ActionMapping.Add(ECharacterActionType::Attack, &APHPlayableCharacter::Attack);
+	ActionMapping.Add(ECharacterActionType::Aim, &APHPlayableCharacter::Aim);
 }
 
 void APHPlayableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APHPlayerController* PHPlayerController = Cast<APHPlayerController>(GetController());
-	if (PHPlayerController)
+	PlayerController = Cast<APHPlayerController>(GetController());
+	if (PlayerController)
 	{
-		EnableInput(PHPlayerController);
+		EnableInput(PlayerController);
 	}
 
-	if (PHPlayerController != nullptr)
+	if (PlayerController != nullptr)
 	{
-		InteractComponent->OnInteractTargetOn.BindUObject(PHPlayerController, &APHPlayerController::ShowInteractUI);
-		InteractComponent->OnInteractTargetOff.BindUObject(PHPlayerController, &APHPlayerController::HideInteractUI);
+		InteractComponent->OnInteractTargetOn.BindUObject(PlayerController, &APHPlayerController::ShowInteractUI);
+		InteractComponent->OnInteractTargetOff.BindUObject(PlayerController, &APHPlayerController::HideInteractUI);
 	}
 }
 
@@ -235,6 +236,35 @@ void APHPlayableCharacter::SetMappingContext()
 void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 {
 	Attack();
+}
+
+void APHPlayableCharacter::Aim(const FInputActionValue& Value)
+{
+	if (PlayerController == nullptr)
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Aiming"));
+	// 마우스 위치 받아오기
+	FVector WorldOrigin, WorldDirection;
+	if (PlayerController->DeprojectMousePositionToWorld(WorldOrigin, WorldDirection))
+	{
+		// 마우스 방향으로 멀리 직선 연장
+		FVector TraceEnd = WorldOrigin + WorldDirection * 10000.f;
+
+		// 캐릭터 → 마우스 방향 벡터
+		FVector ToCursor = TraceEnd - GetActorLocation();
+		
+
+		if (!ToCursor.IsNearlyZero())
+		{
+			FRotator TargetRot = ToCursor.Rotation();
+
+			// Pitch, Roll 제거 (Yaw만 회전)
+			SetActorRotation(FRotator(0.f, TargetRot.Yaw, 0.f));
+		}
+	}
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
