@@ -18,7 +18,8 @@ enum class ECharacterActionType : uint8
 	DropWeapon = 4,
 	AimStart = 5,
 	AimHold = 6,
-	AimENd = 7,
+	AimEnd = 7,
+	SwapWeapon = 8,
 };
 
 USTRUCT()

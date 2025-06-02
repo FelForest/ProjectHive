@@ -3,9 +3,13 @@
 
 #include "Character/PHPlayableCharacter.h"
 
-// Camera Setction
+// Camera Section
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+
+
+// Movement Section
+#include "GameFramework/CharacterMovementComponent.h"
 
 //#include "Input/PHCharacterInputActionData.h"
 
@@ -83,6 +87,11 @@ APHPlayableCharacter::APHPlayableCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
+	// Setting Movement
+	bUseControllerRotationYaw = false;
+	// 이게 가능한 이유 : 맴버 변수로 가지고 있어서 이게 먼저 초기화되는게 보장됨
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	// Setting InteractComponent
 	InteractComponent = CreateDefaultSubobject<UPHInteractComponent>(TEXT("InteractComponent"));
 
@@ -98,7 +107,9 @@ APHPlayableCharacter::APHPlayableCharacter()
 	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
 	ActionMapping.Add(ECharacterActionType::DropWeapon, &APHPlayableCharacter::DropWeapon);
 	ActionMapping.Add(ECharacterActionType::Attack, &APHPlayableCharacter::Attack);
-	ActionMapping.Add(ECharacterActionType::Aim, &APHPlayableCharacter::Aim);
+	ActionMapping.Add(ECharacterActionType::AimStart, &APHPlayableCharacter::AimStart);
+	ActionMapping.Add(ECharacterActionType::AimHold, &APHPlayableCharacter::AimHold);
+	ActionMapping.Add(ECharacterActionType::AimEnd, &APHPlayableCharacter::AimEnd);
 }
 
 void APHPlayableCharacter::BeginPlay()
@@ -137,11 +148,8 @@ void APHPlayableCharacter::Attack()
 	}
 }
 
-
-
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
 {
-	
 	for (const auto& pair : CharacterInputActionData->InputBindings)
 	{
 		auto ActionType = pair.Key;
@@ -233,38 +241,68 @@ void APHPlayableCharacter::SetMappingContext()
 	}
 }
 
+bool APHPlayableCharacter::UpdateMouseLocation()
+{
+	if (PlayerController == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PLayerController is nullptr"))
+		return false;
+	}
+
+	FHitResult HitResult;
+	// TODO : 공중 같은 곳에 에임을 할때 발생하는 문제를 처리하기 위해 Collision을 하나 맵 전체에 덮을 예정
+	// 마우스가 몬스터 같은 공격 가능한 액터를 hit할경우 따로 분기 처리 필요
+	const bool Hit = PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
+	if (Hit && HitResult.bBlockingHit)
+	{
+		MouseLocation = HitResult.Location;
+		return true;
+	}
+	return false;
+}
+
 void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 {
 	Attack();
 }
 
-void APHPlayableCharacter::Aim(const FInputActionValue& Value)
+void APHPlayableCharacter::AimStart(const FInputActionValue& Value)
 {
-	if (PlayerController == nullptr)
-	{
-		return;
-	}
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	// 이동속도 조절
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+}
 
-	UE_LOG(LogTemp, Log, TEXT("Aiming"));
+void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
+{
 	// 마우스 위치 받아오기
-	FVector WorldOrigin, WorldDirection;
-	if (PlayerController->DeprojectMousePositionToWorld(WorldOrigin, WorldDirection))
+	if (UpdateMouseLocation())
 	{
-		// 마우스 방향으로 멀리 직선 연장
-		FVector TraceEnd = WorldOrigin + WorldDirection * 10000.f;
+		// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+		const FVector ToMouse = MouseLocation - GetActorLocation();
+		// 방향만 보는 용도여서 정규화 필요 없음
+		// 캐릭터 Rotator Yaw 만 변경
 
-		// 캐릭터 → 마우스 방향 벡터
-		FVector ToCursor = TraceEnd - GetActorLocation();
-		
-
-		if (!ToCursor.IsNearlyZero())
+		// 마우스 방향이 무시할 정도가 아니라는 것
+		if (!ToMouse.IsNearlyZero())
 		{
-			FRotator TargetRot = ToCursor.Rotation();
-
-			// Pitch, Roll 제거 (Yaw만 회전)
-			SetActorRotation(FRotator(0.f, TargetRot.Yaw, 0.f));
+			FRotator CurrentRotation = GetActorRotation();
+			const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
+			SetActorRotation(NewRotation);
 		}
 	}
+}
+
+void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// 이동속도 조절
+	GetCharacterMovement()->MaxWalkSpeed = 720.0f;
+}
+
+void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
+{
+	EquipmentComponent->SwapWeapon();
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)

@@ -48,8 +48,12 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 
 	if (EquipmentSlots[TargetTyep] != nullptr)
 	{
+		// 무기는 특별 취급 해야하기 때문에 여기서 분기
+		if (TargetTyep == EEquipmentType::Weapon)
+		{
+
+		}
 		// 버리기 함수
-		//DropEquipment(InEquipment);
 		DropEquipment(EquipmentSlots[TargetTyep]);
 		// 버리는 함수에서 타입별로 확인하고 분기해 주는게 맞는듯
 		// 이때 델리게이트 UI
@@ -103,6 +107,10 @@ void UPHEquipmentComponent::DropEquipment(APHEquipment* InEquipment)
 //	{
 //		DropEquipment(DroppedEquipment);
 //	}
+//}
+
+//void UPHEquipmentComponent::DropEquipment(APHItem* InEquipment)
+//{
 //}
 
 // Consider : 지금은 하나의 타입만 있어서 이런데 -> Preset 만들고 나면 분기 처리 해야함

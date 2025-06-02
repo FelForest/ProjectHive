@@ -38,6 +38,9 @@ public:
 	UFUNCTION()
 	void DropEquipment(APHEquipment* InEquipment);
 
+	UFUNCTION()
+
+
 	/*UFUNCTION()
 	void DropEquipment(class APHItem* InEquipment);*/
 
@@ -58,9 +61,12 @@ public:
 	FOnEquipmentUnequippedDelegate OnEquipmentUnequipped;
 
 private:
+	// 장비 슬롯
 	TMap<EEquipmentType, APHEquipment*> EquipmentSlots;
 
+	// 폰의 Mesh를 받아오는 변수
 	TObjectPtr<USkeletalMeshComponent> AttachMesh;
 
-	//FVector DropLocation;
+	// 인정하기 싫지만 무기는 특별 취급을 해서 스왑을 위한 배열
+	TArray<APHEquipment*> WeaponInventory;
 };

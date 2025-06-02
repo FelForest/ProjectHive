@@ -74,11 +74,17 @@ protected:
 
 	void Attack(const FInputActionValue& Value);
 
-	void Aim(const FInputActionValue& Value);
+	void AimStart(const FInputActionValue& Value);
+
+	void AimHold(const FInputActionValue& Value);
+
+	void AimEnd(const FInputActionValue& Value);
+
+	void SwapWeapon(const FInputActionValue& Value);
 
 	void SetMappingContext();
 
-
+	bool UpdateMouseLocation();
 
 
 public:
@@ -129,4 +135,7 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class APHPlayerController> PlayerController;
+
+	UPROPERTY()
+	FVector MouseLocation;
 };

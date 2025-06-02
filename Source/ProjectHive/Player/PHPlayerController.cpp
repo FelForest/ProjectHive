@@ -21,8 +21,10 @@ void APHPlayerController::ShowInteractUI(AActor* Target)
 	IPHInteractableInterface* InteractActor = Cast<IPHInteractableInterface>(Target);
 	if (InteractActor != nullptr)
 	{
+		UE_LOG(LogTemp, Log, TEXT("BEGINOVERLAP"));
 		InteractActor->ShowInteractUI();
 	}
+
 }
 
 void APHPlayerController::HideInteractUI(AActor* Target)
@@ -54,10 +56,12 @@ void APHPlayerController::ShowMouseCursor(bool IsShow)
 	{
 		if (IsShow)
 		{
-			bShowMouseCursor = true;
 			FInputModeGameAndUI InputMode;
 			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			InputMode.SetHideCursorDuringCapture(false);
+
 			SetInputMode(InputMode);
+			bShowMouseCursor = true;
 		}
 		else
 		{

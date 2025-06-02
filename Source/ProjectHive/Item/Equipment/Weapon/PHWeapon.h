@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Item/Equipment/PHEquipment.h"
+#include "Interface/PHAttackInterface.h"
 #include "PHWeapon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTHIVE_API APHWeapon : public APHEquipment
+class PROJECTHIVE_API APHWeapon : public APHEquipment,
+	public IPHAttackInterface
 {
 	GENERATED_BODY()
 
@@ -18,5 +20,5 @@ public:
 	APHWeapon();
 
 	UFUNCTION()
-	void Attack();
+	virtual void Attack() override;
 };
