@@ -45,6 +45,9 @@ public:
 		return SocketName;
 	}
 
+	UFUNCTION()
+	void SetIsEquipped(uint8 InIsEquipped);
+
 	virtual void DropItem(const FVector& InDropLocation) override;
 
 protected:
@@ -61,4 +64,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sock)
 	FName SocketName;
+
+	// 현재 손에 들려있는지 아닌지 확인하는 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippedFlag)
+	uint8 bIsEquipped;
 };

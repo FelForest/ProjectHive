@@ -18,7 +18,13 @@ void APHEquipment::ResetTransform()
 
 void APHEquipment::OnEquipped()
 {
+	SetIsEquipped(true);
 	ResetTransform();
+}
+
+void APHEquipment::SetIsEquipped(uint8 InIsEquipped)
+{
+	bIsEquipped = InIsEquipped;
 }
 
 void APHEquipment::DropItem(const FVector& InDropLocation)
@@ -32,6 +38,7 @@ void APHEquipment::DropItem(const FVector& InDropLocation)
 		EquipmentMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -98.5f));
 	}
 	
+	SetIsEquipped(false);
 	SetOwner(nullptr);
 	
 }

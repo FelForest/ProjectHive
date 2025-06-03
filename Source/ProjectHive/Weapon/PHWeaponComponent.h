@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PHWeaponComponent.generated.h"
 
+class APHWeapon;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECTHIVE_API UPHWeaponComponent : public UActorComponent
@@ -22,20 +23,20 @@ public:
 
 	// WeaponComponent에 바인딩할 함수
 	UFUNCTION()
-	void SetWeapon(class APHEquipment* InEquipment);
+	void SetWeapon(class APHEquipment* InWeapon);
 
 	UFUNCTION()
-	void ClearWeapon(class APHEquipment* InEquipment);
+	void ClearWeapon(class APHEquipment* InWeapon);
 
 	UFUNCTION()
-	class APHEquipment* GetWeapon() const;
-
+	class APHWeapon* GetWeapon() const;
 
 	void InitializeWeaponMesh(class USkeletalMeshComponent* CharacterMesh);
 
+
 protected:
-	// 사용할 무기 정보
 	UPROPERTY()
-	TObjectPtr<class APHWeapon> Weapon;
-	
+	// 현재 무기
+	TObjectPtr<class APHWeapon> CurrentWeapon;
+
 };

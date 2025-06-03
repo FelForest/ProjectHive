@@ -6,9 +6,12 @@
 APHWeapon::APHWeapon()
 {
 	EquipmentType = EEquipmentType::Weapon;
+	bIsEquipped = false;
 }
 
 void APHWeapon::Attack()
 {
 	UE_LOG(LogTemp, Log, TEXT("Attack!!"));
 }
+
+

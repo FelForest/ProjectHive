@@ -38,9 +38,6 @@ public:
 	UFUNCTION()
 	void DropEquipment(APHEquipment* InEquipment);
 
-	UFUNCTION()
-
-
 	/*UFUNCTION()
 	void DropEquipment(class APHItem* InEquipment);*/
 
@@ -53,8 +50,10 @@ public:
 		AttachMesh = InAttachMesh;
 	}
 
-	/*UFUNCTION()
-	void SetDropLocation(const FVector& InDropLocation);*/
+	UFUNCTION()
+	void SwapWeapon(float Direction);
+
+	bool IsFullWeaponInventory();
 
 public:	
 	FOnEquipmentEquippedDelegate OnEquipmentEquipped;
@@ -67,6 +66,18 @@ private:
 	// 폰의 Mesh를 받아오는 변수
 	TObjectPtr<USkeletalMeshComponent> AttachMesh;
 
-	// 인정하기 싫지만 무기는 특별 취급을 해서 스왑을 위한 배열
-	TArray<APHEquipment*> WeaponInventory;
+	// 인전하기 싫지만 무기는 따로 배열로 관리해야할듯
+
+	// 사용할 무기 정보 배열
+	UPROPERTY()
+	TArray<TObjectPtr<APHEquipment>> WeaponInventory;
+
+	// 배열 크기
+	int32 WeaponInventorySize;
+
+	// 현재 배열이 가득 찼는지 알기 위한 변수
+	int32 WeaponCount;
+
+	// 현재 배열의 몇변째 무기를 들고 있는지 알기 위한 변수
+	int32 CurrentWeaponIndex;
 };

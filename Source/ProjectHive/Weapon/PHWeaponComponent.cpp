@@ -11,64 +11,66 @@ UPHWeaponComponent::UPHWeaponComponent()
 
 void UPHWeaponComponent::Attack()
 {
-	if (Weapon != nullptr)
+	if (CurrentWeapon != nullptr)
 	{
-		Weapon->Attack();
+		CurrentWeapon->Attack();
 	}
 }
 
-void UPHWeaponComponent::SetWeapon(APHEquipment* InEquipment)
+void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 {
 	// 기존의 장비가 변경되는 경우에도 이 함수 호출
 	// 이때 먼저 장비가 있는지 확인 후 기존의 바인딩된 함수 다 제거해야함
-	if (Weapon != nullptr)
-	{
-		// TODO : 여기서 제거 필요
-	}
 
 	// Use Delegate to UI
 
-	APHWeapon* NewWeapon = Cast<APHWeapon>(InEquipment);
+	if (InWeapon == nullptr)
+	{
+		CurrentWeapon = nullptr;
+		return;
+	}
 
-	// 무기가 아니여서 캐스팅 실패
+	if (InWeapon->GetEquipmentType() != EEquipmentType::Weapon)
+	{
+		return;
+	}
+
+	APHWeapon* NewWeapon = Cast<APHWeapon>(InWeapon);
 	if (NewWeapon == nullptr)
 	{
 		return;
 	}
 
 	// 무기 설정
-	Weapon = NewWeapon;
+	CurrentWeapon = NewWeapon;
 
-	// 무기가 아니라고 판단
-	if (Weapon == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon is nullptr"));
-		return;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Weapon Equipped : %s"), *Weapon->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Weapon Equipped : %s"), *CurrentWeapon->GetName());
 
 	// TODO : 발사 결과 값에 따라 애니메이션 다르게 하려고함
 	// 바인딩 위치는 여기가 맞다고 판단
 	// 캐릭터를 인터페이스로 캐스팅 후 바인딩할 예정
 }
 
-void UPHWeaponComponent::ClearWeapon(APHEquipment* InEquipment)
+void UPHWeaponComponent::ClearWeapon(APHEquipment* InWeapon)
 {
-	if (Weapon)
+	if (CurrentWeapon == InWeapon)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Weapon is Clear"));
 		// TODO : 기존 무기가 바인딩된 함수 제거 필요
-		Weapon = nullptr;
+
+		CurrentWeapon->SetIsEquipped(false);
+
+		CurrentWeapon = nullptr;
 	}
 }
 
-APHEquipment* UPHWeaponComponent::GetWeapon() const
+APHWeapon* UPHWeaponComponent::GetWeapon() const
 {
-	return Cast<APHEquipment>(Weapon);
+	return CurrentWeapon;
 }
 
 void UPHWeaponComponent::InitializeWeaponMesh(USkeletalMeshComponent* CharacterMesh)
 {
 }
+
 

@@ -24,6 +24,7 @@
 // Item Including Section
 #include "Item/PHItem.h"
 #include "Item/Equipment/PHEquipment.h"
+#include "Item/Equipment/Weapon/PHWeapon.h"
 
 // Equipment Section
 #include "Weapon/PHWeaponComponent.h"
@@ -110,6 +111,7 @@ APHPlayableCharacter::APHPlayableCharacter()
 	ActionMapping.Add(ECharacterActionType::AimStart, &APHPlayableCharacter::AimStart);
 	ActionMapping.Add(ECharacterActionType::AimHold, &APHPlayableCharacter::AimHold);
 	ActionMapping.Add(ECharacterActionType::AimEnd, &APHPlayableCharacter::AimEnd);
+	ActionMapping.Add(ECharacterActionType::SwapWeapon, &APHPlayableCharacter::SwapWeapon);
 }
 
 void APHPlayableCharacter::BeginPlay()
@@ -302,7 +304,13 @@ void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
 
 void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 {
-	EquipmentComponent->SwapWeapon();
+	// 무기 컴포넌트에서 현재 무기와 보조 무기의 위치를 바꿈
+	// 마우스 휠로 값을 받아옴
+	float Direction = Value.Get<float>();
+
+	UE_LOG(LogTemp, Log, TEXT("%f"), Direction);
+
+	EquipmentComponent->SwapWeapon(Direction);
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
