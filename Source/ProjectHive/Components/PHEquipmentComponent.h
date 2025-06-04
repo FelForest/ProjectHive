@@ -51,7 +51,7 @@ public:
 	}
 
 	UFUNCTION()
-	void SwapWeapon(float Direction);
+	void SwapWeapon(int32 Direction);
 
 	bool IsFullWeaponInventory();
 

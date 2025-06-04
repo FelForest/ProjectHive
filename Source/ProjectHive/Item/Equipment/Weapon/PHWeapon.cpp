@@ -11,7 +11,7 @@ APHWeapon::APHWeapon()
 
 void APHWeapon::Attack()
 {
-	UE_LOG(LogTemp, Log, TEXT("Attack!!"));
+	UE_LOG(LogTemp, Log, TEXT("%s : Attack!!"), *GetName());
 }
 
 

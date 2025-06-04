@@ -306,11 +306,26 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 {
 	// 무기 컴포넌트에서 현재 무기와 보조 무기의 위치를 바꿈
 	// 마우스 휠로 값을 받아옴
-	float Direction = Value.Get<float>();
 
-	UE_LOG(LogTemp, Log, TEXT("%f"), Direction);
+	float ScrollValue = Value.Get<float>();
 
-	EquipmentComponent->SwapWeapon(Direction);
+	int32 Direction = 0;
+	// 양수
+	if (ScrollValue > 0.0f)
+	{
+		Direction = 1;
+	}
+	// 음수
+	else if(ScrollValue < 0.0f)
+	{
+		Direction = -1;
+	}
+
+	if (Direction != 0)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%d"), Direction);
+		EquipmentComponent->SwapWeapon(Direction);
+	}
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)

@@ -68,9 +68,8 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 			// 현재 무기가 하나 이상이면
 			if (WeaponCount > 0)
 			{
-				//WeaponInventory[CurrentWeaponIndex]->GetEquipmentMesh()->SetLeaderPoseComponent(nullptr);
-				//WeaponInventory[CurrentWeaponIndex]->GetEquipmentMesh()->SetAnimInstanceClass(nullptr);
-				//WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
+				// 기존 장비의 애니메이션 설정을 위한것
+				WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
 
 				CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponInventorySize;
 				EquipmentSlots[TargetTyep] = nullptr;
@@ -165,9 +164,9 @@ void UPHEquipmentComponent::SetEquipmentSlot(/*EquipmentTypePreset*/)
 	}
 }
 
-void UPHEquipmentComponent::SwapWeapon(float Direction)
+void UPHEquipmentComponent::SwapWeapon(int32 Direction)
 {
-	int32 NextWeaponIndex = (CurrentWeaponIndex + static_cast<int32>(Direction) + WeaponInventorySize) % WeaponInventorySize;
+	int32 NextWeaponIndex = (CurrentWeaponIndex + Direction + WeaponInventorySize) % WeaponInventorySize;
 
 	if (WeaponInventory[CurrentWeaponIndex] != nullptr)
 	{
@@ -175,9 +174,14 @@ void UPHEquipmentComponent::SwapWeapon(float Direction)
 		WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
 	}
 
+	// 현재 슬롯에 인벤토리에 있는 무기 등록
+	EquipmentSlots[EEquipmentType::Weapon] = WeaponInventory[NextWeaponIndex];
 	// UI 및 스탯 갱신용 델리게이트 발행
 	OnEquipmentEquipped.Broadcast(WeaponInventory[NextWeaponIndex]);
-
+	if (EquipmentSlots[EEquipmentType::Weapon] != nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %s"), *EquipmentSlots[EEquipmentType::Weapon]->GetName());
+	}
 	CurrentWeaponIndex = NextWeaponIndex;
 }
 
