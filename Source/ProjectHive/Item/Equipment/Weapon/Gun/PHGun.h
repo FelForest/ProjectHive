@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,36 +24,40 @@ public:
 	virtual void BeginPlay() override;
 
 	// Interface Section
-	// È÷½ºÆ®ÄµÀ¸·Î È®ÀÎÇÏ±â
+	// íˆìŠ¤íŠ¸ìº”ìœ¼ë¡œ í™•ì¸í•˜ê¸°
 	virtual void Fire() override;
 
-	// ÀåÀü ÇÔ¼ö
-	// CONSIDER : ºü¸¥ ÀåÀü °í·Á
+	// ì¥ì „ í•¨ìˆ˜
+	// CONSIDER : ë¹ ë¥¸ ì¥ì „ ê³ ë ¤
 	virtual void Reload() override;
 
-	// »óÀ§ Å¬·¡½º¿¡¼­ ¿À¹ö¶óÀÌµù ÇÏ´Â ÇÔ¼ö ¼½¼Ç
+	// ìƒìœ„ í´ë˜ìŠ¤ì—ì„œ ì˜¤ë²„ë¼ì´ë”© í•˜ëŠ” í•¨ìˆ˜ ì„¹ì…˜
 	virtual void Attack() override;
 
 	virtual void DropItem(const FVector& InDropLocation) override;
 
-	// ¿©±â¼­ ¸¸µé¾îÁø ÇÔ¼ö ¼½¼Ç
-	// ¸ùÅ¸ÁÖ¿¡¼­ ³ëÆ¼ÆÄÀÌ·Î È£ÃâÇÏ±â À§ÇÑ ÇÔ¼ö
+	// ì—¬ê¸°ì„œ ë§Œë“¤ì–´ì§„ í•¨ìˆ˜ ì„¹ì…˜
+	// ëª½íƒ€ì£¼ì—ì„œ ë…¸í‹°íŒŒì´ë¡œ í˜¸ì¶œí•˜ê¸° ìœ„í•œ í•¨ìˆ˜
 	UFUNCTION()
-	void SetIsReloading(bool InIsReloading);
+	void OnReloadingStarted();
 
-	// ¾Ö´Ï¸ŞÀÌ¼Ç ³ëÆ¼ÆÄÀÌ¿¡¼­ ½ÇÇàÇÒ ÇÔ¼ö
+	// ì• ë‹ˆë©”ì´ì…˜ ë…¸í‹°íŒŒì´ì—ì„œ ì‹¤í–‰í•  í•¨ìˆ˜
 	UFUNCTION()
-	void FinishReload();
+	void OnReloadingFinished();
+
+	// ë°œì‚¬ ì—¬ë¶€ë¥¼ ì•Œ ìˆ˜ ìˆëŠ” í•¨ìˆ˜
+	UFUNCTION()
+	bool CanFire() const;
 
 protected:
-	// ¹ß»ç ¿©ºÎ¸¦ ¾Ë ¼ö ÀÖ´Â ÇÔ¼ö
-	bool CanFire() const;
+	void SetIsReloading(bool bInIsReloading);
+	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InitLocation)
 	FVector InitLocation;
 
-	// TODO : µ¥ÀÌÅÍ ¿¡¼ÂÀ¸·Î ¹Ş°Å³ª Å×ÀÌºí·Î ¹Ş°Å³ª
+	// TODO : ë°ì´í„° ì—ì…‹ìœ¼ë¡œ ë°›ê±°ë‚˜ í…Œì´ë¸”ë¡œ ë°›ê±°ë‚˜
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
 	int32 MaxAmmo;
 

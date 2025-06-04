@@ -82,9 +82,15 @@ protected:
 
 	void SwapWeapon(const FInputActionValue& Value);
 
+	void RunStart(const FInputActionValue& Value);
+
+	void RunEnd(const FInputActionValue& Value);
+
 	void SetMappingContext();
 
 	bool UpdateMouseLocation();
+
+	void SetMovementSpeed();
 
 
 public:
@@ -123,6 +129,7 @@ protected:
 	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Interact, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class USphereComponent> InteractTrigger;
 
+
 protected:
 	// Stores binding functions matched to input action enum
 	TMap<ECharacterActionType, void (APHPlayableCharacter::*)(const FInputActionValue&)> ActionMapping;
@@ -138,4 +145,19 @@ protected:
 
 	UPROPERTY()
 	FVector MouseLocation;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "ture"))
+	float WalkSpeed;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "ture"))
+	float AimSpeed;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "ture"))
+	float RunSpeed;
+
+	UPROPERTY()
+	uint8 bIsRunning : 1;
+
+	UPROPERTY()
+	uint8 bIsAimming : 1;
 };

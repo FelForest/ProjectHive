@@ -56,13 +56,6 @@ APHPlayableCharacter::APHPlayableCharacter()
 		GetMesh()->SetAnimClass(CharacterAnim.Class);
 	}
 
-	// Setting Input
-	/*static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Game/ProjectHive/Input/IMC_Player.IMC_Player"));
-	if (InputMappingContextRef.Object != nullptr)
-	{
-		DefaultMappingContext = InputMappingContextRef.Object;
-	}*/
-
 	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Script/ProjectHive.PHCharacterInputActionData'/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData'");
 	if (CharacterInputActionDataRef.Object != nullptr)
 	{
@@ -70,9 +63,6 @@ APHPlayableCharacter::APHPlayableCharacter()
 	}
 
 	SetReplicates(true);
-	// Setting InputAction
-	MoveAction = CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction;
-	InteractAction = CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction;
 
 	// Setting Camera
 	// TODO : Consider moving to an attackable character
@@ -88,10 +78,15 @@ APHPlayableCharacter::APHPlayableCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
-	// Setting Movement
-	bUseControllerRotationYaw = false;
 	// 이게 가능한 이유 : 맴버 변수로 가지고 있어서 이게 먼저 초기화되는게 보장됨
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	AimSpeed = 250.0f;
+	WalkSpeed = 500.0f;
+	RunSpeed = 750.0f;
+	bIsRunning = false;
+
+	// Setting Aim
+	bIsAimming = false;
 
 	// Setting InteractComponent
 	InteractComponent = CreateDefaultSubobject<UPHInteractComponent>(TEXT("InteractComponent"));
@@ -112,6 +107,8 @@ APHPlayableCharacter::APHPlayableCharacter()
 	ActionMapping.Add(ECharacterActionType::AimHold, &APHPlayableCharacter::AimHold);
 	ActionMapping.Add(ECharacterActionType::AimEnd, &APHPlayableCharacter::AimEnd);
 	ActionMapping.Add(ECharacterActionType::SwapWeapon, &APHPlayableCharacter::SwapWeapon);
+	ActionMapping.Add(ECharacterActionType::RunStart, &APHPlayableCharacter::RunStart);
+	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
 }
 
 void APHPlayableCharacter::BeginPlay()
@@ -129,6 +126,10 @@ void APHPlayableCharacter::BeginPlay()
 		InteractComponent->OnInteractTargetOn.BindUObject(PlayerController, &APHPlayerController::ShowInteractUI);
 		InteractComponent->OnInteractTargetOff.BindUObject(PlayerController, &APHPlayerController::HideInteractUI);
 	}
+
+	// Setting Movement
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -263,6 +264,22 @@ bool APHPlayableCharacter::UpdateMouseLocation()
 	return false;
 }
 
+void APHPlayableCharacter::SetMovementSpeed()
+{
+	if (bIsAimming)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
+	}
+	else if (bIsRunning)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	}
+}
+
 void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 {
 	Attack();
@@ -271,8 +288,9 @@ void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 void APHPlayableCharacter::AimStart(const FInputActionValue& Value)
 {
 	GetCharacterMovement()->bOrientRotationToMovement = false;
+	bIsRunning = true;
 	// 이동속도 조절
-	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
 }
 
 void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
@@ -297,9 +315,10 @@ void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
 
 void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
 {
+	bIsRunning = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// 이동속도 조절
-	GetCharacterMovement()->MaxWalkSpeed = 720.0f;
+	SetMovementSpeed();
 }
 
 void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
@@ -326,6 +345,20 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Log, TEXT("%d"), Direction);
 		EquipmentComponent->SwapWeapon(Direction);
 	}
+}
+
+void APHPlayableCharacter::RunStart(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Log, TEXT("Run"));
+	bIsRunning = true;
+	SetMovementSpeed();
+}
+
+void APHPlayableCharacter::RunEnd(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Log, TEXT("Walk"));
+	bIsRunning = false;
+	SetMovementSpeed();
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)

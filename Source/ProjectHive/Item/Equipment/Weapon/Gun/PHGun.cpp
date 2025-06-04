@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/Equipment/Weapon/Gun/PHGun.h"
@@ -10,7 +10,7 @@ APHGun::APHGun()
 
 	bIsReloading = false;
 
-	// ÇöÀç µ¥ÀÌÅÍ ¹Þ¾Æ¿À´Â °÷ÀÌ ¾øÀ¸¹Ç·Î ÀÓÀÇ·Î ¼³Á¤
+	// í˜„ìž¬ ë°ì´í„° ë°›ì•„ì˜¤ëŠ” ê³³ì´ ì—†ìœ¼ë¯€ë¡œ ìž„ì˜ë¡œ ì„¤ì •
 	MaxAmmo = 10;
 	FireRate = 1.0f;
 	Damage = 1.0f;
@@ -21,33 +21,33 @@ void APHGun::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ÃÊ±â ÃÑ¾Ë ¼¼ÆÃ
+	// ì´ˆê¸° ì´ì•Œ ì„¸íŒ…
 	CurrentAmmo = MaxAmmo;
 }
 
 void APHGun::Fire()
 {
-	// ÃÑ±¸ À§Ä¡ ¹Þ¾Æ¿À±â
+	// ì´êµ¬ ìœ„ì¹˜ ë°›ì•„ì˜¤ê¸°
 	MuzzleLocation = EquipmentMesh->GetSocketLocation(TEXT("AssaultRifleMuzzle_1"));
 	MuzzleRotation = EquipmentMesh->GetSocketRotation(TEXT("AssaultRifleMuzzle_1"));
 
-	// È÷Æ®½ºÄµÀ» À§ÇÑ ¶óÀÎÆ®·¡ÀÌ½Ì ÁØºñ
-	// ½ÃÀÛ°ú ³¡ À§Ä¡
+	// ížˆíŠ¸ìŠ¤ìº”ì„ ìœ„í•œ ë¼ì¸íŠ¸ëž˜ì´ì‹± ì¤€ë¹„
+	// ì‹œìž‘ê³¼ ë ìœ„ì¹˜
 	FVector TraceStart = MuzzleLocation;
 	FVector TraceEnd = MuzzleLocation + MuzzleRotation.Vector() * Range;
 
-	// ¹ß»ç °á°ú¸¦ ¹Þ´Â ±¸Á¶Ã¼
+	// ë°œì‚¬ ê²°ê³¼ë¥¼ ë°›ëŠ” êµ¬ì¡°ì²´
 	FHitResult HitResult;
 
 	const bool Hit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility);
 
-	// ÀÇ¹®ÀÎ°Ô ÀÌ¹Ì ¿©±â¿¡¼­ ¸Â¾Ò´ÂÁö ¾Æ´ÑÁö È®ÀÎÇÏ´Âµ¥
+	// ì˜ë¬¸ì¸ê²Œ ì´ë¯¸ ì—¬ê¸°ì—ì„œ ë§žì•˜ëŠ”ì§€ ì•„ë‹Œì§€ í™•ì¸í•˜ëŠ”ë°
 	if (Hit)
 	{
-		// ¿©±â¼­ È®ÀÎÇÏ´Â°Ô ÀÇ¹Ì°¡ ÀÖ´Â°¡¿¡ ´ëÇÑ °íÂû
+		// ì—¬ê¸°ì„œ í™•ì¸í•˜ëŠ”ê²Œ ì˜ë¯¸ê°€ ìžˆëŠ”ê°€ì— ëŒ€í•œ ê³ ì°°
 		if (HitResult.bBlockingHit)
 		{
-			// ¸ÂÀº ÂÊ¿¡ ApplyDamage È£Ãâ
+			// ë§žì€ ìª½ì— ApplyDamage í˜¸ì¶œ
 		}
 	}
 
@@ -59,18 +59,12 @@ void APHGun::Fire()
 
 void APHGun::Reload()
 {
-	// ÀåÀüÁßÀÎ°Å ¾Ë¸®´Â ÇÃ·¡±×°ª ¼³Á¤
-	bIsReloading = true;
-
-	// CONSIDER : ±âÁ¸ ÅºÃ¢¿¡ ¾ó¸¶³ª ÀÖ´ÂÁö ¾Ë·ÁÁÖ´Â ¹æ½Ä °í·Á
-	CurrentAmmo = 0;
-	// À§¿¡ °í·Á½Ã µ¨¸®°ÔÀÌÆ®·Î UI ¾÷µ¥ÀÌÆ® ÇÊ¿ä
-
+	// ìºë¦­í„°ì—ì„œ ì‹¤í–‰í•˜ëŠ”ê±°ì—¬ì„œ ëª¨ë¥´ê² ë‹¤
 }
 
 void APHGun::Attack()
 {
-	// »óÀ§¿¡¼­´Â Attack È£Ãâ
+	// ìƒìœ„ì—ì„œëŠ” Attack í˜¸ì¶œ
 	Super::Attack();
 	Fire();
 }
@@ -82,24 +76,32 @@ void APHGun::DropItem(const FVector& InDropLocation)
 	EquipmentMesh->SetRelativeLocation(InitLocation);
 }
 
+void APHGun::OnReloadingStarted()
+{
+	SetIsReloading(true);
+
+	// í˜„ìž¬ íƒ„í™˜ì„ ë²„ë ¸ìŠµë‹ˆë‹¤ í•˜ê²Œ í•˜ë©´ ë˜ëŠ”ê±°ë¼(CurrentAmmo) ë„˜ê¸°ê¸°
+
+	CurrentAmmo = 0;
+	// ì—¬ê¸°ì„œ ë¸ë¦¬ê²Œì´íŠ¸ë¡œ UI ì—…ë°ì´íŠ¸
+}
+
+void APHGun::OnReloadingFinished()
+{
+	CurrentAmmo = MaxAmmo;
+
+	// ì—¬ê¸°ì„œ ë¸ë¦¬ê²Œì´íŠ¸ë¡œ UI ì—…ë°ì´íŠ¸
+	SetIsReloading(false);
+}
+
 void APHGun::SetIsReloading(bool bInIsReloading)
 {
 	bIsReloading = bInIsReloading;
 }
 
-void APHGun::FinishReload()
-{
-	CurrentAmmo = MaxAmmo;
-
-	// ¿©±â¼­ µ¨¸®°ÔÀÌÆ®·Î UI ¾÷µ¥ÀÌÆ®
-
-	// ÀåÀüÀÌ ³¡³ª´Ù°í ¼³Á¤
-	SetIsReloading(false);
-}
-
 bool APHGun::CanFire() const
 {
-	// ÇöÀç ÅºÈ¯ÀÌ ³²¾ÆÀÖ°í ÀåÀüÁßÀÌ ¾Æ´Ï¸é ¹ß»ç °¡´É
+	// í˜„ìž¬ íƒ„í™˜ì´ ë‚¨ì•„ìžˆê³  ìž¥ì „ì¤‘ì´ ì•„ë‹ˆë©´ ë°œì‚¬ ê°€ëŠ¥
 	return (CurrentAmmo > 0 && !bIsReloading);
 }
 

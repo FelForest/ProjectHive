@@ -1,21 +1,31 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "PHPartsAnimInstance.generated.h"
+#include "PHGunAnimInstance.generated.h"
 
 /**
-* 
+ * Author		: 임동현
+ * Date			: 2025-06-04
+ * Description	:
+ * 이동
+ * 조준
+ * 공격
+ * 무기 변경
+ * 수류탄 던지기
+ * 상호작용하는 상태
+ * 죽는 모션
+ *
  */
 UCLASS()
-class PROJECTHIVE_API UPHPartsAnimInstance : public UAnimInstance
+class PROJECTHIVE_API UPHGunAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-	
+
 public:
-	UPHPartsAnimInstance();
+	UPHGunAnimInstance();
 
 	// Native initialization override point
 	virtual void NativeInitializeAnimation() override;
@@ -28,20 +38,39 @@ public:
 	// for linked anim instances, only called when the hosting node(s) are relevant
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
-	// Only use in PHPartsCharacter 
 public:
+	// 애니메이션을 재생하는 캐릭터
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class APHPartsCharacter> Owner;
 
+	// 캐릭터 무브먼트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class UCharacterMovementComponent> Movement;
 
+	// 속도
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	FVector Velocity;
 
+	// 땅에서의 속도
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	float GroundSpeed;
 
+	// 현재 움직이는지 아닌지확인용
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsIdle : 1;
+
+	// 현재 조준중인지 아닌지 확인용
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gun)
+	uint8 bIsAiming : 1;
+
+	// 폰의 앞 방향
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gun)
+	FVector Forward;
+
+	// 현재 장전중인지 아닌지 확인용
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gun)
+	uint8 bIsReloading : 1;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Gun)
+	
 };
