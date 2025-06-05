@@ -46,6 +46,9 @@ public:
 	}
 
 	UFUNCTION()
+	bool IsEquipped() const;
+
+	UFUNCTION()
 	void SetIsEquipped(uint8 InIsEquipped);
 
 	virtual void DropItem(const FVector& InDropLocation) override;
@@ -67,5 +70,5 @@ protected:
 
 	// 현재 손에 들려있는지 아닌지 확인하는 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippedFlag)
-	uint8 bIsEquipped;
+	uint8 bIsEquipped : 1;
 };

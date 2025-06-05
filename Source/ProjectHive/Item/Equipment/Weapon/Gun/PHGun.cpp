@@ -105,4 +105,9 @@ bool APHGun::CanFire() const
 	return (CurrentAmmo > 0 && !bIsReloading);
 }
 
+bool APHGun::IsReloading() const
+{
+	return bIsReloading;
+}
+
 

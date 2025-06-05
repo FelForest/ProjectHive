@@ -4,6 +4,8 @@
 #include "Animation/PHGunAnimInstance.h"
 #include "Character/PHPlayableCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Weapon/PHWeaponComponent.h"
+#include "Item/Equipment/Weapon/Gun/PHGun.h"
 
 UPHGunAnimInstance::UPHGunAnimInstance()
 {
@@ -15,10 +17,13 @@ void UPHGunAnimInstance::NativeInitializeAnimation()
 
 	Owner = Cast<APHPlayableCharacter>(GetOwningActor());
 
-	if (Owner)
+	if (Owner == nullptr)
 	{
-		Movement = Owner->GetCharacterMovement();
+		return;
 	}
+
+	Movement = Owner->GetCharacterMovement();
+	WeaponComponent = Owner->GetWeaponComponent();
 
 
 }
@@ -27,8 +32,14 @@ void UPHGunAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
+	// 아직 못 받아 올 수도 있음
+	if (Owner == nullptr)
+	{
+		return;
+	}
+
 	// 이동 속도 업데이트
-	if (Movement)
+	if (Movement != nullptr)
 	{
 		Velocity = Movement->Velocity;
 		GroundSpeed = Velocity.Size2D();
@@ -36,8 +47,27 @@ void UPHGunAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = (GroundSpeed <= 0.0f);
 	}
 
-	// CONSIDER : 내적을 Instance에서 하는게 맞는지 아니면 캐릭터에서 하는게 맞는지 모르겠다
+	// 현재 조준중인지 업데이트
+	
+	bIsAiming = Owner->IsAiming();
+	TensionLevel = Owner->GetTensionLevel();
 
+	if (WeaponComponent != nullptr)
+	{
+		Weapon = WeaponComponent->GetWeapon();
+		if (Weapon != nullptr)
+		{
+			bIsEquipped = Weapon->IsEquipped();
+		}
+	}
+
+	// 방향 계산해주는 함수 있으니 여기서 합시다
+
+	// 현재 회전값 업데이트
+	Rotation = Owner->GetActorRotation();
+
+	// 조준방향과 이동방향의 각도 계산
+	AimDirection = CalculateDirection(Velocity, Rotation);
 }
 
 void UPHGunAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)

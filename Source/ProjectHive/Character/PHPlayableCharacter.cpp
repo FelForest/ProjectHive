@@ -43,24 +43,17 @@
 
 APHPlayableCharacter::APHPlayableCharacter()
 {
+	// Tick 활성화
+	PrimaryActorTick.bCanEverTick = true;
+
 	// Setting Weapon 
 	WeaponComponent = CreateDefaultSubobject<UPHWeaponComponent>(TEXT("WeaponComponent"));
 
 	// Setting Equipment
 	EquipmentComponent = CreateDefaultSubobject<UPHEquipmentComponent>(TEXT("EquipmentComponent"));
 
-	// Setting AnimInstance
-	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/ABP_AR.ABP_AR_C"));
-	if (CharacterAnim.Class)
-	{
-		GetMesh()->SetAnimClass(CharacterAnim.Class);
-	}
-
-	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Script/ProjectHive.PHCharacterInputActionData'/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData'");
-	if (CharacterInputActionDataRef.Object != nullptr)
-	{
-		CharacterInputActionData = CharacterInputActionDataRef.Object;
-	}
+	// LoadAssets
+	LoadAssets();
 
 	SetReplicates(true);
 
@@ -86,7 +79,12 @@ APHPlayableCharacter::APHPlayableCharacter()
 	bIsRunning = false;
 
 	// Setting Aim
-	bIsAimming = false;
+	bIsAiming = false;
+
+	// Setting TensionLevel
+	TensionDecayRate = 1.0f;
+	MaxTensionLevel = 100.0f;
+	MinTensionLevel = 0.0f;
 
 	// Setting InteractComponent
 	InteractComponent = CreateDefaultSubobject<UPHInteractComponent>(TEXT("InteractComponent"));
@@ -99,22 +97,65 @@ APHPlayableCharacter::APHPlayableCharacter()
 	InteractTrigger->SetSphereRadius(98.5f);
 
 	// Setting Action
-	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
-	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
-	ActionMapping.Add(ECharacterActionType::DropWeapon, &APHPlayableCharacter::DropWeapon);
-	ActionMapping.Add(ECharacterActionType::Attack, &APHPlayableCharacter::Attack);
-	ActionMapping.Add(ECharacterActionType::AimStart, &APHPlayableCharacter::AimStart);
-	ActionMapping.Add(ECharacterActionType::AimHold, &APHPlayableCharacter::AimHold);
-	ActionMapping.Add(ECharacterActionType::AimEnd, &APHPlayableCharacter::AimEnd);
-	ActionMapping.Add(ECharacterActionType::SwapWeapon, &APHPlayableCharacter::SwapWeapon);
-	ActionMapping.Add(ECharacterActionType::RunStart, &APHPlayableCharacter::RunStart);
-	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
+	InitializeActionMappings();
+}
+
+bool APHPlayableCharacter::IsAiming() const
+{
+	return bIsAiming;
+}
+
+UPHWeaponComponent* APHPlayableCharacter::GetWeaponComponent() const
+{
+	return WeaponComponent;
+}
+
+float APHPlayableCharacter::GetAimDirection() const
+{
+	return AimDirection;
+}
+
+float APHPlayableCharacter::GetTensionLevel() const
+{
+	return TensionLevel;
+}
+
+void APHPlayableCharacter::LoadAssets()
+{
+	// Load AnimInstance
+	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/NewFolder/ABP_AR.ABP_AR_C"));
+	if (CharacterAnim.Class)
+	{
+		GetMesh()->SetAnimClass(CharacterAnim.Class);
+	}
+
+	// Load CharacterInputActionData
+	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Script/ProjectHive.PHCharacterInputActionData'/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData'");
+	if (CharacterInputActionDataRef.Object != nullptr)
+	{
+		CharacterInputActionData = CharacterInputActionDataRef.Object;
+	}
+
+	// Load TensionDecreaseCurve
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> TensionDecreaseCurveRef = TEXT("/Game/ProjectHive/Curve/Curve_Tension_Decay.Curve_Tension_Decay");
+	if (TensionDecreaseCurveRef.Object != nullptr)
+	{
+		TensionDecreaseCurve = TensionDecreaseCurveRef.Object;
+	}
+
+	// Load TensionIncreaseCurve
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> TensionIncreaseCurveRef = TEXT("/Game/ProjectHive/Curve/Curve_Tension_Increase.Curve_Tension_Increase");
+	if (TensionIncreaseCurveRef.Object != nullptr)
+	{
+		TensionIncreaseCurve = TensionIncreaseCurveRef.Object;
+	}
 }
 
 void APHPlayableCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 이거 따로 뺄지 고민해 보기
 	PlayerController = Cast<APHPlayerController>(GetController());
 	if (PlayerController)
 	{
@@ -130,6 +171,49 @@ void APHPlayableCharacter::BeginPlay()
 	// Setting Movement
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+	// Setting Timeline
+	InitializeTimeLine();
+}
+
+void APHPlayableCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Setting Timeline
+	TensionDecreaseTimeline.TickTimeline(DeltaTime);
+	TensionIncreaseTimeline.TickTimeline(DeltaTime);
+
+	UE_LOG(LogTemp, Log, TEXT("%f"), TensionLevel);
+}
+
+void APHPlayableCharacter::InitializeTimeLine()
+{
+	// 경계레벨 감소용 함수 바인딩
+	FOnTimelineFloat TensionDecreaseUpdate;
+	TensionDecreaseUpdate.BindUFunction(this, FName("DecreaseTensionLevel"));
+
+	TensionDecreaseTimeline.AddInterpFloat(TensionDecreaseCurve, TensionDecreaseUpdate);
+
+	// 경계레벨 증가용 함수 바인딩
+	FOnTimelineFloat TensionIncreaseUpdate;
+	TensionIncreaseUpdate.BindUFunction(this, FName("IncreaseTensionLevel"));
+
+	TensionIncreaseTimeline.AddInterpFloat(TensionIncreaseCurve, TensionIncreaseUpdate);
+}
+
+void APHPlayableCharacter::InitializeActionMappings()
+{
+	ActionMapping.Add(ECharacterActionType::MoveAction, &APHPlayableCharacter::Move);
+	ActionMapping.Add(ECharacterActionType::InteractAction, &APHPlayableCharacter::Interact);
+	ActionMapping.Add(ECharacterActionType::DropWeapon, &APHPlayableCharacter::DropWeapon);
+	ActionMapping.Add(ECharacterActionType::Attack, &APHPlayableCharacter::Attack);
+	ActionMapping.Add(ECharacterActionType::AimStart, &APHPlayableCharacter::AimStart);
+	ActionMapping.Add(ECharacterActionType::AimHold, &APHPlayableCharacter::AimHold);
+	ActionMapping.Add(ECharacterActionType::AimEnd, &APHPlayableCharacter::AimEnd);
+	ActionMapping.Add(ECharacterActionType::SwapWeapon, &APHPlayableCharacter::SwapWeapon);
+	ActionMapping.Add(ECharacterActionType::RunStart, &APHPlayableCharacter::RunStart);
+	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
 }
 
 void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -145,7 +229,11 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void APHPlayableCharacter::Attack()
 {
-	if (WeaponComponent != nullptr)
+	// 타임라인 재생
+	TensionIncreaseTimeline.SetLooping(false);
+	TensionDecreaseTimeline.Stop();
+	TensionIncreaseTimeline.Play();
+	if (WeaponComponent != nullptr && TensionLevel == MaxTensionLevel)
 	{
 		WeaponComponent->Attack();
 	}
@@ -266,7 +354,7 @@ bool APHPlayableCharacter::UpdateMouseLocation()
 
 void APHPlayableCharacter::SetMovementSpeed()
 {
-	if (bIsAimming)
+	if (bIsAiming)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
 	}
@@ -280,15 +368,27 @@ void APHPlayableCharacter::SetMovementSpeed()
 	}
 }
 
+void APHPlayableCharacter::DecreaseTensionLevel(float Value)
+{
+	TensionLevel = Value * 100.0f;
+}
+
+void APHPlayableCharacter::IncreaseTensionLevel(float Value)
+{
+	TensionLevel = Value * 100.0f;
+}
+
 void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 {
+
 	Attack();
 }
 
 void APHPlayableCharacter::AimStart(const FInputActionValue& Value)
 {
+	TensionLevel = MaxTensionLevel;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
-	bIsRunning = true;
+	bIsAiming = true;
 	// 이동속도 조절
 	GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
 }
@@ -308,14 +408,18 @@ void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
 		{
 			FRotator CurrentRotation = GetActorRotation();
 			const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
-			SetActorRotation(NewRotation);
+			SetActorRotation(NewRotation);	
 		}
 	}
+
+
 }
 
 void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
 {
-	bIsRunning = false;
+	TensionDecreaseTimeline.SetLooping(false);
+	TensionDecreaseTimeline.PlayFromStart();
+	bIsAiming = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// 이동속도 조절
 	SetMovementSpeed();
@@ -342,21 +446,18 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 
 	if (Direction != 0)
 	{
-		UE_LOG(LogTemp, Log, TEXT("%d"), Direction);
 		EquipmentComponent->SwapWeapon(Direction);
 	}
 }
 
 void APHPlayableCharacter::RunStart(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Run"));
 	bIsRunning = true;
 	SetMovementSpeed();
 }
 
 void APHPlayableCharacter::RunEnd(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Walk"));
 	bIsRunning = false;
 	SetMovementSpeed();
 }
@@ -401,5 +502,3 @@ void APHPlayableCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 }
-
-

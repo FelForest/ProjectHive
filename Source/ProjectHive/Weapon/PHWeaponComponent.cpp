@@ -44,8 +44,8 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 	// 무기 설정
 	CurrentWeapon = NewWeapon;
 
-	//UE_LOG(LogTemp, Warning, TEXT("Weapon Equipped : %s"), *CurrentWeapon->GetName());
-
+	// 여기서 어떤 무기인지 분기로 나누어야함
+	
 	// TODO : 발사 결과 값에 따라 애니메이션 다르게 하려고함
 	// 바인딩 위치는 여기가 맞다고 판단
 	// 캐릭터를 인터페이스로 캐스팅 후 바인딩할 예정

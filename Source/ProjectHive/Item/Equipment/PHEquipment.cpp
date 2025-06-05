@@ -9,6 +9,8 @@ APHEquipment::APHEquipment()
 	ItemType = EItemType::Equipment;
 	EquipmentMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EquipmentMesh"));
 	EquipmentMesh->SetupAttachment(RootComponent);
+	bIsEquipped = false;
+
 }
 
 void APHEquipment::ResetTransform()
@@ -18,8 +20,17 @@ void APHEquipment::ResetTransform()
 
 void APHEquipment::OnEquipped()
 {
-	SetIsEquipped(true);
+	SetIsEquipped(false);
 	ResetTransform();
+	if (bIsEquipped)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Equipped"));
+	}
+}
+
+bool APHEquipment::IsEquipped() const
+{
+	return bIsEquipped;
 }
 
 void APHEquipment::SetIsEquipped(uint8 InIsEquipped)

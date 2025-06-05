@@ -49,6 +49,9 @@ public:
 	UFUNCTION()
 	bool CanFire() const;
 
+	UFUNCTION()
+	bool IsReloading() const;
+
 protected:
 	void SetIsReloading(bool bInIsReloading);
 	
@@ -76,7 +79,7 @@ protected:
 	int32 CurrentAmmo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Reload)
-	uint8 bIsReloading;
+	uint8 bIsReloading : 1;
 
 	UPROPERTY()
 	FVector MuzzleLocation;
