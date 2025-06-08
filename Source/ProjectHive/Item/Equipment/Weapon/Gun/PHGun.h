@@ -11,6 +11,9 @@
 /**
  * 
  */
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReload, int32 /*현재 탄환*/, int32 /*현재 탄창*/)
+
 UCLASS()
 class PROJECTHIVE_API APHGun : public APHWeapon,
 	public IPHFireInterface,
@@ -28,8 +31,16 @@ public:
 	virtual void Fire() override;
 
 	// 장전 함수
+	
+	// 무기 컴포넌트에서 실행할 함수
+	virtual void ReloadStart() override;
+
 	// CONSIDER : 빠른 장전 고려
 	virtual void Reload() override;
+
+	virtual void ReloadEnd() override;
+
+	virtual bool IsReloading() const override;
 
 	// 상위 클래스에서 오버라이딩 하는 함수 섹션
 	virtual void Attack() override;
@@ -45,16 +56,29 @@ public:
 	UFUNCTION()
 	void OnReloadingFinished();
 
+	virtual bool CanAttack() override; 
+
 	// 발사 여부를 알 수 있는 함수
 	UFUNCTION()
 	bool CanFire() const;
 
 	UFUNCTION()
-	bool IsReloading() const;
+	void SetCanFire(bool InCanFire);
+
+	UFUNCTION()
+	class UPHGunMontageDataAsset* GetGunMontageData();
+
+	UFUNCTION()
+	virtual bool CanReload() const override;
 
 protected:
 	void SetIsReloading(bool bInIsReloading);
-	
+
+	UFUNCTION()
+	void ResetCanFire();
+
+public:
+	FOnReload OnReload;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InitLocation)
@@ -73,10 +97,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
 	float Range;
 
-
+	UPROPERTY()
+	uint8 bCanFire : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
 	int32 CurrentAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
+	int32 MaxMagazine;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
+	int32 CurrentMagazine;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Reload)
 	uint8 bIsReloading : 1;
@@ -86,4 +117,14 @@ protected:
 
 	UPROPERTY()
 	FRotator MuzzleRotation;
+
+	// 발사 속도를 조절하는 타이머 핸들
+	UPROPERTY()
+	FTimerHandle FireRateHandle;
+
+
+	// 무기마다 몽타주가 다르기 때문에 무기에서 관리하는 방식으로 설정 -> 추후 데이터 에셋으로 불러오게 만들예정
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Montage, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UPHGunMontageDataAsset> GunMontageData;
+
 };

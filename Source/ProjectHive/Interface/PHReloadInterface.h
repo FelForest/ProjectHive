@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,5 +24,18 @@ class PROJECTHIVE_API IPHReloadInterface
 public:
 
 	UFUNCTION()
+	virtual void ReloadStart() = 0;
+
+	UFUNCTION()
 	virtual void Reload() = 0;
+
+	UFUNCTION()
+	virtual void ReloadEnd() = 0;
+
+	// 장전 관련 플래그가 필요
+	UFUNCTION()
+	virtual bool CanReload() const = 0;
+
+	UFUNCTION()
+	virtual bool IsReloading() const = 0;
 };

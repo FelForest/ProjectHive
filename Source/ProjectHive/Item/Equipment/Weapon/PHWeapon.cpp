@@ -14,4 +14,14 @@ void APHWeapon::Attack()
 	UE_LOG(LogTemp, Log, TEXT("%s : Attack!!"), *GetName());
 }
 
+bool APHWeapon::CanAttack()
+{
+	return false;
+}
+
+EWeaponType APHWeapon::GetWeaponType()
+{
+	return WeaponType;
+}
+
 

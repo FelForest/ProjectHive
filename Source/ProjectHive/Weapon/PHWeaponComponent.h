@@ -4,9 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ItemData/PHWeaponType.h"
 #include "PHWeaponComponent.generated.h"
 
 class APHWeapon;
+class UAnimMontage;
+class APHGun;
+
+using WeaponSetupFunc = void (UPHWeaponComponent::*)();
+
+// UI 및 스탯 컴포넌트에 사용할 델리게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGunEquipped, const APHGun* /*EquippedWeapon*/);
+
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECTHIVE_API UPHWeaponComponent : public UActorComponent
@@ -31,12 +41,67 @@ public:
 	UFUNCTION()
 	class APHWeapon* GetWeapon() const;
 
+	UFUNCTION()
+	bool CanAttack();
+
+	// 무기(총)가 가지고 있는 몽타주 Getter 함수
+	UFUNCTION()
+	UAnimMontage* GetNormalAimAttackMontage();
+
+	UFUNCTION()
+	UAnimMontage* GetNormalAttackMontage();
+
+	UFUNCTION()
+	UAnimMontage* GetSpecialAttackMontage();
+
+	UFUNCTION()
+	UAnimMontage* GetReloadMontage();
+
+	UFUNCTION()
+	UAnimMontage* GetThrowMontage();
+
+	// 총 전용 함수
+	UFUNCTION()
+	bool CanReload();
+
+	UFUNCTION()
+	void ReloadStart();
+
+	UFUNCTION()
+	void ReloadEnd(UAnimMontage* Montage, bool bInterrupted);
+
+
 	void InitializeWeaponMesh(class USkeletalMeshComponent* CharacterMesh);
 
+public:
+	FOnGunEquipped OnGunEquipped;
 
 protected:
 	UPROPERTY()
 	// 현재 무기
 	TObjectPtr<class APHWeapon> CurrentWeapon;
+
+	// 타입 별로 캐스팅 하게 해야하는데 이거 하나씩 만드는거 별로인데 방법이 있나?
+	// 일단 타입(enum) + 캐스팅(함수포인터)를 맵으로 저장해 두기
+
+	
+	TMap<EWeaponType, WeaponSetupFunc> WeaponSettingMap;
+
+
+	// 캐스팅 용 함수 -> 이름을 다르게 만들어야 하나, 파라미터가 같은데.., 탬플릿으로 만들려고 해도 결국은 입력이 같으니까 의미가 없고 더 좋은 방법이 있나?
+	// 이 방향이 맞나?
+	// 실제 타입을 아는 것은 cpp에서만 해도 될거 같음
+	void SetGun();
+
+	// 무기(총) 몽타주
+	TObjectPtr<UAnimMontage> NormalAimAttackMontage;
+
+	TObjectPtr<UAnimMontage> NormalAttackMontage;
+
+	TObjectPtr<UAnimMontage> SpecialAttackMontage;
+
+	TObjectPtr<UAnimMontage> ReloadMontage;
+
+	TObjectPtr<UAnimMontage> ThrowMontage;
 
 };

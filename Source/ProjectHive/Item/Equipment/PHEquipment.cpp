@@ -20,7 +20,7 @@ void APHEquipment::ResetTransform()
 
 void APHEquipment::OnEquipped()
 {
-	SetIsEquipped(false);
+	SetIsEquipped(true);
 	ResetTransform();
 	if (bIsEquipped)
 	{

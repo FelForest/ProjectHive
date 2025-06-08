@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Item/Equipment/PHEquipment.h"
 #include "Interface/PHAttackInterface.h"
+#include "ItemData/PHWeaponType.h"
 #include "PHWeapon.generated.h"
 
 /**
@@ -21,4 +22,14 @@ public:
 
 	UFUNCTION()
 	virtual void Attack() override;
+
+	UFUNCTION()
+	virtual bool CanAttack();
+
+	UFUNCTION()
+	EWeaponType GetWeaponType();
+
+protected:
+	UPROPERTY()
+	EWeaponType WeaponType;
 };

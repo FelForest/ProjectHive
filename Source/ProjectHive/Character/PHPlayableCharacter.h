@@ -10,6 +10,7 @@
 
 #include "Interface/PHAttackInterface.h"
 #include "Interface/PHItemInterface.h"
+#include "Interface/PHGrenadeThrowInterface.h"
 
 #include "Components/TimelineComponent.h"
 
@@ -41,7 +42,8 @@ DECLARE_MULTICAST_DELEGATE(FOnEquipmentAcquired);
 UCLASS()
 class PROJECTHIVE_API APHPlayableCharacter : public APHPartsCharacter,
 	public IPHAttackInterface,
-	public IPHItemInterface
+	public IPHItemInterface,
+	public IPHGrenadeThrowInterface
 {
 	GENERATED_BODY()
 	
@@ -89,6 +91,9 @@ public:
 	UFUNCTION()
 	float GetTensionLevel() const;
 
+	// 수류탄 던지는 함수
+	virtual void ThrowGrenade() override;
+
 protected:
 	// ConstructorHelpers 너무 길어서 따로 뺌
 	void LoadAssets();
@@ -126,6 +131,8 @@ protected:
 
 	void RunEnd(const FInputActionValue& Value);
 
+	void Reload(const FInputActionValue& Value);
+
 	void SetMappingContext();
 	
 	// 입력시 마우스 위치 업데이트
@@ -141,6 +148,16 @@ protected:
 	// 경계 레벨을 증가 시키는 함수
 	UFUNCTION()
 	void IncreaseTensionLevel(float Value);
+
+	// 공격 몽타주가 끝나는것을 알기 위한 함수
+	UFUNCTION()
+	void OnAttackActionMontageEnd(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void StartIncreaseTinesionFromCurrentLevel();
+
+	UFUNCTION()
+	void SetActorToTargetRotation(float Value);
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
@@ -178,7 +195,8 @@ protected:
 	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Interact, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class USphereComponent> InteractTrigger;
 
-
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UAnimMontage> AttackActionMontage;
 
 protected:
 	// Stores binding functions matched to input action enum
@@ -246,4 +264,20 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = TensionLevel)
 	UCurveFloat* TensionDecreaseCurve;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = FireRate, meta = (AllowPrivateAccess = "ture"))
+	float FireRate;
+
+	UPROPERTY()
+	uint8 bIsAttacking : 1;
+
+
+	// 캐릭터 회전에 따른 보간 처리를 위한 타임라인
+	UPROPERTY()
+	FTimeline SettingRotationTimeline;
+
+	// 사용할 커브
+	UPROPERTY()
+	UCurveFloat* RotationCurve;
+
 };

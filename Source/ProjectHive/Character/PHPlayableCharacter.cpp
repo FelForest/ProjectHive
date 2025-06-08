@@ -98,6 +98,10 @@ APHPlayableCharacter::APHPlayableCharacter()
 
 	// Setting Action
 	InitializeActionMappings();
+
+	// TODO : 발사 속도 조절을 위해서 어쩌구 저쩌구 Test
+	FireRate = 1.0f;
+	bIsAttacking = false;
 }
 
 bool APHPlayableCharacter::IsAiming() const
@@ -120,6 +124,11 @@ float APHPlayableCharacter::GetTensionLevel() const
 	return TensionLevel;
 }
 
+void APHPlayableCharacter::ThrowGrenade()
+{
+	
+}
+
 void APHPlayableCharacter::LoadAssets()
 {
 	// Load AnimInstance
@@ -130,7 +139,7 @@ void APHPlayableCharacter::LoadAssets()
 	}
 
 	// Load CharacterInputActionData
-	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Script/ProjectHive.PHCharacterInputActionData'/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData'");
+	static ConstructorHelpers::FObjectFinder<UPHCharacterInputActionData> CharacterInputActionDataRef = TEXT("/Game/ProjectHive/Input/PHC_InputActionData.PHC_InputActionData");
 	if (CharacterInputActionDataRef.Object != nullptr)
 	{
 		CharacterInputActionData = CharacterInputActionDataRef.Object;
@@ -148,6 +157,13 @@ void APHPlayableCharacter::LoadAssets()
 	if (TensionIncreaseCurveRef.Object != nullptr)
 	{
 		TensionIncreaseCurve = TensionIncreaseCurveRef.Object;
+	}
+
+	// Load RotationCurve
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> RotationCurveRef = TEXT("/Game/ProjectHive/Curve/Curve_TurnRotation.Curve_TurnRotation");
+	if (RotationCurveRef.Object != nullptr)
+	{
+		RotationCurve = RotationCurveRef.Object;
 	}
 }
 
@@ -179,12 +195,10 @@ void APHPlayableCharacter::BeginPlay()
 void APHPlayableCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	// Setting Timeline
 	TensionDecreaseTimeline.TickTimeline(DeltaTime);
 	TensionIncreaseTimeline.TickTimeline(DeltaTime);
-
-	UE_LOG(LogTemp, Log, TEXT("%f"), TensionLevel);
+	SettingRotationTimeline.TickTimeline(DeltaTime);
 }
 
 void APHPlayableCharacter::InitializeTimeLine()
@@ -200,6 +214,12 @@ void APHPlayableCharacter::InitializeTimeLine()
 	TensionIncreaseUpdate.BindUFunction(this, FName("IncreaseTensionLevel"));
 
 	TensionIncreaseTimeline.AddInterpFloat(TensionIncreaseCurve, TensionIncreaseUpdate);
+
+	FOnTimelineFloat ActorRotationUpdate;
+	ActorRotationUpdate.BindUFunction(this, FName("SetActorToTargetRotation"));
+
+	SettingRotationTimeline.AddInterpFloat(RotationCurve, ActorRotationUpdate);
+
 }
 
 void APHPlayableCharacter::InitializeActionMappings()
@@ -214,6 +234,9 @@ void APHPlayableCharacter::InitializeActionMappings()
 	ActionMapping.Add(ECharacterActionType::SwapWeapon, &APHPlayableCharacter::SwapWeapon);
 	ActionMapping.Add(ECharacterActionType::RunStart, &APHPlayableCharacter::RunStart);
 	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
+	ActionMapping.Add(ECharacterActionType::Reload, &APHPlayableCharacter::Reload);
+	ActionMapping.Add(ECharacterActionType::ThrowGrenade, &APHPlayableCharacter::Reload);
+	
 }
 
 void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -229,12 +252,46 @@ void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 void APHPlayableCharacter::Attack()
 {
-	// 타임라인 재생
-	TensionIncreaseTimeline.SetLooping(false);
-	TensionDecreaseTimeline.Stop();
-	TensionIncreaseTimeline.Play();
-	if (WeaponComponent != nullptr && TensionLevel == MaxTensionLevel)
+	// 달리기 중이면 공격불가
+	if (bIsRunning)
 	{
+		return;
+	}
+	// 타임라인 재생
+	if (!TensionIncreaseTimeline.IsPlaying() && TensionLevel != MaxTensionLevel)
+	{
+		TensionIncreaseTimeline.Play();
+	}
+
+	if (WeaponComponent != nullptr && WeaponComponent->CanAttack() && TensionLevel == MaxTensionLevel)
+	{
+		if (!bIsAttacking)
+		{
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (AnimInstance != nullptr)
+			{
+				bIsAttacking = true;
+				// 조준 여부에 따라 호출하는 몽타주 다르게 하기
+				if (IsAiming())
+				{
+					AttackActionMontage = WeaponComponent->GetNormalAimAttackMontage();
+				}
+				else
+				{
+					AttackActionMontage = WeaponComponent->GetNormalAttackMontage();
+				}
+				if (AttackActionMontage != nullptr)
+				{
+					// 몽타주 끝날때 실행되는 델리게이트, 애님 몽타주랑, 불값을 인수로 가짐
+					FOnMontageEnded EndDelegate;
+					EndDelegate.BindUObject(this, &APHPlayableCharacter::OnAttackActionMontageEnd);
+
+					AnimInstance->Montage_Play(AttackActionMontage, 0.9f);
+					AnimInstance->Montage_SetEndDelegate(EndDelegate, AttackActionMontage);
+				}
+				
+			}
+		}
 		WeaponComponent->Attack();
 	}
 }
@@ -370,40 +427,87 @@ void APHPlayableCharacter::SetMovementSpeed()
 
 void APHPlayableCharacter::DecreaseTensionLevel(float Value)
 {
-	TensionLevel = Value * 100.0f;
+	TensionLevel = MaxTensionLevel * Value;
 }
 
 void APHPlayableCharacter::IncreaseTensionLevel(float Value)
 {
-	TensionLevel = Value * 100.0f;
+	
+	TensionLevel = MaxTensionLevel * Value;
+}
+
+void APHPlayableCharacter::OnAttackActionMontageEnd(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == AttackActionMontage)
+	{
+		bIsAttacking = false;
+	}
+}
+
+void APHPlayableCharacter::StartIncreaseTinesionFromCurrentLevel()
+{
+	if (!TensionIncreaseTimeline.IsPlaying())
+	{
+		float Length = TensionIncreaseCurve->FloatCurve.GetLastKey().Time;
+		float TensionLevelStart = (TensionLevel / MaxTensionLevel) * Length;
+		TensionIncreaseTimeline.SetPlaybackPosition(TensionLevelStart, false, false);
+		TensionIncreaseTimeline.SetLooping(false);
+		TensionIncreaseTimeline.Play();
+	}
+}
+
+void APHPlayableCharacter::SetActorToTargetRotation(float Value)
+{
+	if (!UpdateMouseLocation())
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Log, TEXT("Set"));
+	const FVector ToMouse = MouseLocation - GetActorLocation();
+	FRotator CurrentRotation = GetActorRotation();
+	const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
+	FRotator TargetRotation = FMath::Lerp(CurrentRotation, NewRotation, Value);
+	SetActorRotation(TargetRotation);
 }
 
 void APHPlayableCharacter::Attack(const FInputActionValue& Value)
 {
-
 	Attack();
 }
 
 void APHPlayableCharacter::AimStart(const FInputActionValue& Value)
 {
-	TensionLevel = MaxTensionLevel;
+	// 달리는 중이면 조준 불가
+	if (bIsRunning)
+	{
+		return;
+	}
+
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	bIsAiming = true;
 	// 이동속도 조절
 	GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
+
+	// 회전 타임라인 초기화
+	SettingRotationTimeline.SetPlaybackPosition(0.0f, false, false);
 }
 
 void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
 {
+	if (bIsRunning)
+	{
+		return;
+	}
+	bIsAiming = true;
+
+	/*SettingRotationTimeline.SetLooping(false);
+	SettingRotationTimeline.PlayFromStart();*/
 	// 마우스 위치 받아오기
 	if (UpdateMouseLocation())
 	{
 		// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
 		const FVector ToMouse = MouseLocation - GetActorLocation();
-		// 방향만 보는 용도여서 정규화 필요 없음
-		// 캐릭터 Rotator Yaw 만 변경
 
-		// 마우스 방향이 무시할 정도가 아니라는 것
 		if (!ToMouse.IsNearlyZero())
 		{
 			FRotator CurrentRotation = GetActorRotation();
@@ -411,14 +515,11 @@ void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
 			SetActorRotation(NewRotation);	
 		}
 	}
-
-
 }
 
 void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
 {
-	TensionDecreaseTimeline.SetLooping(false);
-	TensionDecreaseTimeline.PlayFromStart();
+	SettingRotationTimeline.Stop();
 	bIsAiming = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	// 이동속도 조절
@@ -453,13 +554,61 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 void APHPlayableCharacter::RunStart(const FInputActionValue& Value)
 {
 	bIsRunning = true;
+	// 달리기 시작하면 조준 끝내기
+	if (bIsAiming)
+	{
+		AimEnd(Value);
+	}
+
+	// 경계레벨 0으로 만들기
+	TensionLevel = MinTensionLevel;
 	SetMovementSpeed();
 }
 
 void APHPlayableCharacter::RunEnd(const FInputActionValue& Value)
 {
 	bIsRunning = false;
+	if (bIsAiming)
+	{
+		TensionLevel = MaxTensionLevel;
+	}
+
 	SetMovementSpeed();
+}
+
+void APHPlayableCharacter::Reload(const FInputActionValue& Value)
+{
+	if (WeaponComponent == nullptr)
+	{
+		return;
+	}
+
+	if (WeaponComponent->CanReload())
+	{
+		UAnimMontage* ReloadMontage = WeaponComponent->GetReloadMontage();
+		if (ReloadMontage == nullptr)
+		{
+			UE_LOG(LogTemp, Log, TEXT("ReloadMontage is nullptr"));
+			return;
+		}
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance != nullptr)
+		{
+			// 몽타주 실행중 다시 실행하지 말라고 플래그값 세우기
+			WeaponComponent->ReloadStart();
+
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindUObject(WeaponComponent, &UPHWeaponComponent::ReloadEnd);
+
+			AnimInstance->Montage_Play(ReloadMontage, 1.2f);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, ReloadMontage);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Can't Reload"));
+	}
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
