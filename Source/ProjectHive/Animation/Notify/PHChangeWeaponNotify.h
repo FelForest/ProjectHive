@@ -1,19 +1,19 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "PHThrowGrenadeNotify.generated.h"
+#include "PHChangeWeaponNotify.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTHIVE_API UPHThrowGrenadeNotify : public UAnimNotify
+class PROJECTHIVE_API UPHChangeWeaponNotify : public UAnimNotify
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

@@ -11,6 +11,8 @@
 #include "Interface/PHAttackInterface.h"
 #include "Interface/PHItemInterface.h"
 #include "Interface/PHGrenadeThrowInterface.h"
+#include "Interface/PHWeaponAnimOwnerInterface.h"
+#include "Interface/PHWeaponChangeInterface.h"
 
 #include "Components/TimelineComponent.h"
 
@@ -43,7 +45,9 @@ UCLASS()
 class PROJECTHIVE_API APHPlayableCharacter : public APHPartsCharacter,
 	public IPHAttackInterface,
 	public IPHItemInterface,
-	public IPHGrenadeThrowInterface
+	public IPHGrenadeThrowInterface,
+	public IPHWeaponAnimOwnerInterface,
+	public IPHWeaponChangeInterface
 {
 	GENERATED_BODY()
 	
@@ -66,6 +70,13 @@ public:
 	// 컨트롤러가 빙의할 때 호출하는 함수
 	virtual void PossessedBy(AController* NewController) override;
 
+	// 무기가 장착 되었을때 애니메이션 세팅하는 함수
+	virtual void OnWeaponEquipped() override;
+
+	// 무기가 해제 되었을때 이니메이션 세팅하는 함수
+	virtual void OnWeaponUnequipped() override;
+
+	virtual void ChangeWeapon() override;
 	
 
 	// 현재는 public에 있는데 다른곳으로 이동 시킬듯
@@ -91,7 +102,6 @@ public:
 	UFUNCTION()
 	float GetTensionLevel() const;
 
-	// 수류탄 던지는 함수
 	virtual void ThrowGrenade() override;
 
 protected:
@@ -132,6 +142,8 @@ protected:
 	void RunEnd(const FInputActionValue& Value);
 
 	void Reload(const FInputActionValue& Value);
+
+	void ThrowGrenade(const FInputActionValue& Value);
 
 	void SetMappingContext();
 	
@@ -175,6 +187,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment)
 	TObjectPtr<class UPHCharacterStatComponent> StatComponent;
 
+	// Grenade Section
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	TObjectPtr<class UPHGrenadeComponent> GrenadeComponent;
+
 	// Input Section
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
@@ -189,14 +205,23 @@ protected:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UCameraComponent> Camera;
 
+	// Interact Section
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category = Interact, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UPHInteractComponent> InteractComponent;
 
 	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Interact, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class USphereComponent> InteractTrigger;
 
+
+	
 	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UAnimMontage> AttackActionMontage;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UAnimMontage> ChangeWeaponMontage;
+
+	UPROPERTY()
+	TSubclassOf<class UAnimInstance> CharacterAnim;
 
 protected:
 	// Stores binding functions matched to input action enum
@@ -279,5 +304,8 @@ protected:
 	// 사용할 커브
 	UPROPERTY()
 	UCurveFloat* RotationCurve;
+
+	UPROPERTY()
+	int32 SwapDirection;
 
 };

@@ -79,3 +79,8 @@ USceneComponent* APHItem::GetRootComponent()
 	return RootComponent;
 }
 
+void APHItem::OffSimulatePhysics()
+{
+	ItemCollision->SetSimulatePhysics(false);
+	ItemCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}

@@ -48,6 +48,15 @@ public:
 		return ItemType;
 	}
 
+	UFUNCTION()
+	FORCEINLINE class UCapsuleComponent* GetItemCollision()
+	{
+		return ItemCollision;
+	};
+
+	UFUNCTION()
+	void OffSimulatePhysics();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<class UCapsuleComponent> ItemCollision;

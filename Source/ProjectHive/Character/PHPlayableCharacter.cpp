@@ -33,8 +33,12 @@
 // Stat Section
 #include "Components/PHCharacterStatComponent.h"
 
+// Grenade Section
+#include "Components/PHGrenadeComponent.h"
+
 // OverLap Section
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // 임시용
 #include "Player/PHPlayerController.h"
@@ -43,6 +47,9 @@
 
 APHPlayableCharacter::APHPlayableCharacter()
 {
+	// 캐릭터 프리셋 설정
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Playable"));
+
 	// Tick 활성화
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -51,6 +58,9 @@ APHPlayableCharacter::APHPlayableCharacter()
 
 	// Setting Equipment
 	EquipmentComponent = CreateDefaultSubobject<UPHEquipmentComponent>(TEXT("EquipmentComponent"));
+
+	// Setting Grenade
+	GrenadeComponent = CreateDefaultSubobject<UPHGrenadeComponent>(TEXT("GrenadeComponent"));
 
 	// LoadAssets
 	LoadAssets();
@@ -124,18 +134,14 @@ float APHPlayableCharacter::GetTensionLevel() const
 	return TensionLevel;
 }
 
-void APHPlayableCharacter::ThrowGrenade()
-{
-	
-}
-
 void APHPlayableCharacter::LoadAssets()
 {
 	// Load AnimInstance
-	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/NewFolder/ABP_AR.ABP_AR_C"));
-	if (CharacterAnim.Class)
+	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnimRef(TEXT("/Game/ProjectHive/Animation/ABP_Base.ABP_Base_C"));
+	if (CharacterAnimRef.Class)
 	{
-		GetMesh()->SetAnimClass(CharacterAnim.Class);
+		CharacterAnim = CharacterAnimRef.Class;
+		GetMesh()->SetAnimClass(CharacterAnimRef.Class);
 	}
 
 	// Load CharacterInputActionData
@@ -164,6 +170,13 @@ void APHPlayableCharacter::LoadAssets()
 	if (RotationCurveRef.Object != nullptr)
 	{
 		RotationCurve = RotationCurveRef.Object;
+	}
+
+	// Load ChangeWeaponMontage
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ChangeWeaponRef = TEXT("/Game/ProjectHive/Animation/AM_ChangeWeapon.AM_ChangeWeapon");
+	if (ChangeWeaponRef.Object != nullptr)
+	{
+		ChangeWeaponMontage = ChangeWeaponRef.Object;
 	}
 }
 
@@ -235,7 +248,7 @@ void APHPlayableCharacter::InitializeActionMappings()
 	ActionMapping.Add(ECharacterActionType::RunStart, &APHPlayableCharacter::RunStart);
 	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
 	ActionMapping.Add(ECharacterActionType::Reload, &APHPlayableCharacter::Reload);
-	ActionMapping.Add(ECharacterActionType::ThrowGrenade, &APHPlayableCharacter::Reload);
+	ActionMapping.Add(ECharacterActionType::ThrowGrenade, &APHPlayableCharacter::ThrowGrenade);
 	
 }
 
@@ -294,6 +307,15 @@ void APHPlayableCharacter::Attack()
 		}
 		WeaponComponent->Attack();
 	}
+}
+
+void APHPlayableCharacter::ThrowGrenade()
+{
+	if (!UpdateMouseLocation())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Not Update MouseLocation"));
+	}
+	GrenadeComponent->ThrowGrenade(GetMesh(), MouseLocation);
 }
 
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
@@ -533,21 +555,26 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 
 	float ScrollValue = Value.Get<float>();
 
-	int32 Direction = 0;
 	// 양수
 	if (ScrollValue > 0.0f)
 	{
-		Direction = 1;
+		SwapDirection = 1;
 	}
 	// 음수
 	else if(ScrollValue < 0.0f)
 	{
-		Direction = -1;
+		SwapDirection = -1;
 	}
 
-	if (Direction != 0)
+	if (SwapDirection != 0)
 	{
-		EquipmentComponent->SwapWeapon(Direction);
+		// 몽타주 실행
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance != nullptr)
+		{
+			// TODO : 몽타주 실행중 다시 실행하지 말라고 플래그값 세우기
+			AnimInstance->Montage_Play(ChangeWeaponMontage, 1.2f);
+		}
 	}
 }
 
@@ -611,6 +638,23 @@ void APHPlayableCharacter::Reload(const FInputActionValue& Value)
 	}
 }
 
+void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
+{
+	if (bIsRunning)
+	{
+		return;
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Not ThrowGrenade"));
+		return;
+	}
+
+	AnimInstance->Montage_Play(WeaponComponent->GetThrowMontage());
+}
+
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
 {
 	// Item은 타입을 가지고 있어서 그것으로 분기
@@ -623,6 +667,11 @@ void APHPlayableCharacter::PickupItem(APHItem* InItem)
 	if (InItem->GetItemType() == EItemType::Equipment)
 	{
 		EquipmentComponent->Equip(InItem, GetMesh());
+	}
+
+	if (InItem->GetItemType() == EItemType::Consumeable)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get ConsumeItem"));
 	}
 }
 
@@ -650,4 +699,28 @@ void APHPlayableCharacter::PostInitializeComponents()
 void APHPlayableCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+}
+
+void APHPlayableCharacter::OnWeaponEquipped()
+{
+	// 무기 컴포넌트에 가서 무기의 애님인스턴스 가져오기
+	if (WeaponComponent->GetWeapon() == nullptr)
+	{
+		// TODO : 기본 애니메이션 만들면 교체 예정
+		// 무기가 없으면 기본 애니메이션 현재는 지금 없으므로 nullptr
+		GetMesh()->SetAnimClass(CharacterAnim);
+		return;
+	}
+	GetMesh()->SetAnimClass(WeaponComponent->GetWeapon()->GetWeaponAnimClass());
+}
+
+void APHPlayableCharacter::OnWeaponUnequipped()
+{
+
+}
+
+void APHPlayableCharacter::ChangeWeapon()
+{
+	EquipmentComponent->SwapWeapon(SwapDirection);
+	SwapDirection = 0;
 }

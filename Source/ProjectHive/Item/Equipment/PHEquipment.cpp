@@ -10,7 +10,6 @@ APHEquipment::APHEquipment()
 	EquipmentMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EquipmentMesh"));
 	EquipmentMesh->SetupAttachment(RootComponent);
 	bIsEquipped = false;
-
 }
 
 void APHEquipment::ResetTransform()
@@ -26,6 +25,11 @@ void APHEquipment::OnEquipped()
 	{
 		UE_LOG(LogTemp, Log, TEXT("Equipped"));
 	}
+}
+
+void APHEquipment::OnUnEquipped()
+{
+
 }
 
 bool APHEquipment::IsEquipped() const
@@ -47,6 +51,11 @@ void APHEquipment::DropItem(const FVector& InDropLocation)
 	if (EquipmentType == EEquipmentType::BackPack)
 	{
 		EquipmentMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -98.5f));
+	}
+
+	if (EquipmentType == EEquipmentType::Weapon)
+	{
+		EquipmentMesh->SetRelativeLocation(FVector(48.0f, 37.0f, -139.0f));
 	}
 	
 	SetIsEquipped(false);

@@ -27,9 +27,18 @@ public:
 	virtual bool CanAttack();
 
 	UFUNCTION()
-	EWeaponType GetWeaponType();
+	EWeaponType GetWeaponType() const;
+
+	UFUNCTION()
+	FORCEINLINE TSubclassOf<class UAnimInstance> GetWeaponAnimClass()
+	{
+		return WeaponAnimClass;
+	}
 
 protected:
 	UPROPERTY()
 	EWeaponType WeaponType;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TSubclassOf<class UAnimInstance> WeaponAnimClass;
 };

@@ -34,6 +34,9 @@ public:
 	void OnEquipped();
 
 	UFUNCTION()
+	void OnUnEquipped();
+
+	UFUNCTION()
 	FORCEINLINE EEquipmentType GetEquipmentType()
 	{
 		return EquipmentType;
@@ -50,6 +53,9 @@ public:
 
 	UFUNCTION()
 	void SetIsEquipped(uint8 InIsEquipped);
+
+	
+	
 
 	virtual void DropItem(const FVector& InDropLocation) override;
 

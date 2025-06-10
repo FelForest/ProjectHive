@@ -9,7 +9,13 @@
 #include "PHGun.generated.h"
 
 /**
- * 
+ * Author		: 임동현
+ * Date			: 2025-06-02
+ * Description	:
+ * 총 액터
+ * 기본 발사시 총구에서 앞 방향으로 레이케스트를 쏘아서 히트스캔을 함
+ * 탄환, 탄창, 관리
+ * 발사 및 재장전시 델리게이트 발행
  */
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReload, int32 /*현재 탄환*/, int32 /*현재 탄창*/)

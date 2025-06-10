@@ -69,8 +69,11 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 			if (WeaponCount > 0)
 			{
 				// 기존 장비의 애니메이션 설정을 위한것
-				WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
-
+				if (WeaponInventory[CurrentWeaponIndex] != nullptr)
+				{
+					WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
+					WeaponInventory[CurrentWeaponIndex]->GetEquipmentMesh()->SetVisibility(false);
+				}
 				CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponInventorySize;
 				EquipmentSlots[TargetTyep] = nullptr;
 			}
@@ -85,7 +88,7 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 		// 버리는 함수에서 타입별로 확인하고 분기해 주는게 맞는듯
 		// 이때 델리게이트 UI
 
-		DropEquipment(EquipmentSlots[TargetTyep]);
+		(EquipmentSlots[TargetTyep]);
 	}
 
 	
@@ -172,6 +175,11 @@ void UPHEquipmentComponent::SwapWeapon(int32 Direction)
 	{
 		// 기존 무기 애니메이션 관련 변수 세팅
 		WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
+		//WeaponInventory[CurrentWeaponIndex]->GetEquipmentMesh()->SetLeaderPoseComponent(nullptr);
+		// 숨기기
+		WeaponInventory[CurrentWeaponIndex]->GetEquipmentMesh()->SetVisibility(false);
+		UE_LOG(LogTemp, Log, TEXT("CurrentWeapon is UnEquipped"));
+
 	}
 
 	// 현재 슬롯에 인벤토리에 있는 무기 등록
@@ -180,7 +188,10 @@ void UPHEquipmentComponent::SwapWeapon(int32 Direction)
 	OnEquipmentEquipped.Broadcast(WeaponInventory[NextWeaponIndex]);
 	if (EquipmentSlots[EEquipmentType::Weapon] != nullptr)
 	{
+		// 보이기
+		EquipmentSlots[EEquipmentType::Weapon]->GetEquipmentMesh()->SetVisibility(true);
 		UE_LOG(LogTemp, Log, TEXT("CurrentWeapon : %s"), *EquipmentSlots[EEquipmentType::Weapon]->GetName());
+		EquipmentSlots[EEquipmentType::Weapon]->SetIsEquipped(true);
 	}
 	CurrentWeaponIndex = NextWeaponIndex;
 }

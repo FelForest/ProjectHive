@@ -7,6 +7,8 @@
 #include "ItemData/PHGunMontageDataAsset.h"
 #include "Item/Equipment/Weapon/Gun/PHGun.h"
 
+#include "Interface/PHWeaponAnimOwnerInterface.h"
+
 // Sets default values for this component's properties
 UPHWeaponComponent::UPHWeaponComponent()
 {
@@ -26,11 +28,20 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 	// 기존의 장비가 변경되는 경우에도 이 함수 호출
 	// 이때 먼저 장비가 있는지 확인 후 기존의 바인딩된 함수 다 제거해야함
 
+
+	IPHWeaponAnimOwnerInterface* WeaponOwner = Cast<IPHWeaponAnimOwnerInterface>(GetOwner());
+	if (WeaponOwner == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("WeaponOwner is nullptr"));
+		return;
+	}
+
 	// Use Delegate to UI
 
 	if (InWeapon == nullptr)
 	{
 		CurrentWeapon = nullptr;
+		WeaponOwner->OnWeaponEquipped();
 		return;
 	}
 
@@ -46,7 +57,7 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 	}
 
 	// 무기 설정
-	CurrentWeapon = NewWeapon;
+	CurrentWeapon = NewWeapon;	
 	EWeaponType WeaponType = CurrentWeapon->GetWeaponType();
 
 	// 여기서 어떤 무기인지 분기로 나누어야함
@@ -55,11 +66,12 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 		(this->** WeaponSetupFunc)();
 	}
 
+
 	// TODO : 발사 결과 값에 따라 애니메이션 다르게 하려고함
 	// 바인딩 위치는 여기가 맞다고 판단
 	// 캐릭터를 인터페이스로 캐스팅 후 바인딩할 예정
-
-
+	
+	WeaponOwner->OnWeaponEquipped();
 }
 
 void UPHWeaponComponent::ClearWeapon(APHEquipment* InWeapon)
