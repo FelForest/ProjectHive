@@ -53,6 +53,7 @@ public:
 	UFUNCTION()
 	void SwapWeapon(int32 Direction);
 
+	UFUNCTION()
 	bool IsFullWeaponInventory();
 
 public:	

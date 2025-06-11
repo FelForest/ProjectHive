@@ -73,9 +73,9 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 				{
 					WeaponInventory[CurrentWeaponIndex]->SetIsEquipped(false);
 					WeaponInventory[CurrentWeaponIndex]->GetEquipmentMesh()->SetVisibility(false);
+					CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponInventorySize;
+					EquipmentSlots[TargetTyep] = nullptr;
 				}
-				CurrentWeaponIndex = (CurrentWeaponIndex + 1) % WeaponInventorySize;
-				EquipmentSlots[TargetTyep] = nullptr;
 			}
 		}
 	}
@@ -84,11 +84,11 @@ void UPHEquipmentComponent::Equip(APHItem* InItem, USkeletalMeshComponent* InOwn
 	if (EquipmentSlots[TargetTyep] != nullptr)
 	{
 		// 버리기 함수
-
+		DropEquipment(EquipmentSlots[TargetTyep]);
 		// 버리는 함수에서 타입별로 확인하고 분기해 주는게 맞는듯
 		// 이때 델리게이트 UI
 
-		(EquipmentSlots[TargetTyep]);
+		
 	}
 
 	

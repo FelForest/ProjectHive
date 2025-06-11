@@ -171,6 +171,10 @@ protected:
 	UFUNCTION()
 	void SetActorToTargetRotation(float Value);
 
+	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지를 위한 함수
+	UFUNCTION()
+	void OnDeferredWeaponEquipped();
+
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
 
@@ -220,7 +224,7 @@ protected:
 	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "ture"))
 	TObjectPtr<class UAnimMontage> ChangeWeaponMontage;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = Anim)
 	TSubclassOf<class UAnimInstance> CharacterAnim;
 
 protected:

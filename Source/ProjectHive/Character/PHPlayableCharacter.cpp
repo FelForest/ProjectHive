@@ -550,6 +550,11 @@ void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
 
 void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 {
+	//무기가 가득 안차있으면 실행 차단
+	if (!EquipmentComponent->IsFullWeaponInventory())
+	{
+		return;
+	}
 	// 무기 컴포넌트에서 현재 무기와 보조 무기의 위치를 바꿈
 	// 마우스 휠로 값을 받아옴
 
@@ -701,7 +706,7 @@ void APHPlayableCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 }
 
-void APHPlayableCharacter::OnWeaponEquipped()
+void APHPlayableCharacter::OnDeferredWeaponEquipped()
 {
 	// 무기 컴포넌트에 가서 무기의 애님인스턴스 가져오기
 	if (WeaponComponent->GetWeapon() == nullptr)
@@ -712,6 +717,12 @@ void APHPlayableCharacter::OnWeaponEquipped()
 		return;
 	}
 	GetMesh()->SetAnimClass(WeaponComponent->GetWeapon()->GetWeaponAnimClass());
+}
+
+void APHPlayableCharacter::OnWeaponEquipped()
+{
+	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지하기 위해 다음 프레임에서 캐릭터 애니메이션 변경 
+	GetWorldTimerManager().SetTimerForNextTick(this, &APHPlayableCharacter::OnDeferredWeaponEquipped);
 }
 
 void APHPlayableCharacter::OnWeaponUnequipped()
