@@ -3,6 +3,7 @@
 
 #include "Item/Equipment/Weapon/Gun/PHGun.h"
 #include "ItemData/PHGunMontageDataAsset.h"
+#include "Kismet/GameplayStatics.h"
 
 APHGun::APHGun()
 {
@@ -50,7 +51,7 @@ void APHGun::Fire()
 	// 발사 결과를 받는 구조체
 	FHitResult HitResult;
 
-	const bool Hit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility);
+	const bool Hit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_GameTraceChannel16);
 
 	// 의문인게 이미 여기에서 맞았는지 아닌지 확인하는데
 	if (Hit)
@@ -58,7 +59,7 @@ void APHGun::Fire()
 		// 여기서 확인하는게 의미가 있는가에 대한 고찰
 		if (HitResult.bBlockingHit)
 		{
-			// 맞은 쪽에 ApplyDamage 호출
+			UGameplayStatics::ApplyDamage(HitResult.GetActor(), Damage, GetInstigatorController(), this, UDamageType::StaticClass());
 		}
 	}
 

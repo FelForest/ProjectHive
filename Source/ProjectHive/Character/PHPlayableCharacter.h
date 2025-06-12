@@ -104,6 +104,8 @@ public:
 
 	virtual void ThrowGrenade() override;
 
+	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	// ConstructorHelpers 너무 길어서 따로 뺌
 	void LoadAssets();

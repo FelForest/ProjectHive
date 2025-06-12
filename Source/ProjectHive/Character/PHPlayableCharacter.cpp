@@ -318,6 +318,14 @@ void APHPlayableCharacter::ThrowGrenade()
 	GrenadeComponent->ThrowGrenade(GetMesh(), MouseLocation);
 }
 
+float APHPlayableCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+
+	return 0.0f;
+}
+
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
 {
 	for (const auto& pair : CharacterInputActionData->InputBindings)
