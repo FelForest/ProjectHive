@@ -29,6 +29,6 @@ public:
 	virtual void CallAlertDestination() = 0;
 
 	// 오버로드 하려면 리플리케이션 사용 못함 
-	virtual void CallAlertBegin(AActor* NewTarget) = 0;
-	virtual void CallAlertBegin(FVector NewLocation) = 0;
+	virtual void CallAlertTargetBegin(APawn* NewTarget) = 0;
+	virtual void CallAlertDestinationBegin(FVector NewLocation) = 0;
 };

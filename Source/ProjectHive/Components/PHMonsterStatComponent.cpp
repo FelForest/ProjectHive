@@ -6,29 +6,6 @@
 // Sets default values for this component's properties
 UPHMonsterStatComponent::UPHMonsterStatComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	// TODO : 데이터 외부에터 받아오기
+	AlertRadius = 5.0f;
 }
-
-
-// Called when the game starts
-void UPHMonsterStatComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-
-// Called every frame
-void UPHMonsterStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-

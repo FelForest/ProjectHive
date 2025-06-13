@@ -12,6 +12,7 @@ APHWeapon::APHWeapon()
 
 	if (CharacterAnim.Class)
 	{
+		// TODO : 이것도 데이터로 받아와야함
 		WeaponAnimClass = CharacterAnim.Class;
 		EquipmentMesh->SetAnimClass(CharacterAnim.Class);
 	}

@@ -16,19 +16,23 @@ public:
 	// Sets default values for this component's properties
 	UPHMonsterStatComponent();
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-public:
+	UFUNCTION()
 	FORCEINLINE float GetAlertRadius() const
 	{
 		return AlertRadius;
 	}
+
+
+protected:
+	
+	
+public:	
+	
+
+public:
+	
+
+
 
 protected:
 	// 전파 범위

@@ -14,4 +14,6 @@ class PROJECTHIVE_API UPHMonsterSensingComponent : public UPawnSensingComponent
 {
 	GENERATED_BODY()
 	
+public:
+	UPHMonsterSensingComponent();
 };

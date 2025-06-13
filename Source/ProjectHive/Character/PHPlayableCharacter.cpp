@@ -255,6 +255,7 @@ void APHPlayableCharacter::InitializeActionMappings()
 void APHPlayableCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	UE_LOG(LogTemp, Log, TEXT("SetupPlayerInputComponent"));
 
 	SetMappingContext();
 

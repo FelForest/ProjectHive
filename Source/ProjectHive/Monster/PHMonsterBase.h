@@ -53,13 +53,16 @@ public:
 	virtual void CallAlertDestination() override;
 
 	// 몽타주 호출을 위한 함수
-	virtual void CallAlertBegin(AActor* NewTarget) override;
-	virtual void CallAlertBegin(FVector NewLocation) override;
+	UFUNCTION()
+	virtual void CallAlertTargetBegin(APawn* NewTarget) override;
+	UFUNCTION()
+	virtual void CallAlertDestinationBegin(FVector NewLocation) override;
 
 	// Target 설정함수
 	UFUNCTION()
-	FORCEINLINE void SetTarget(AActor* NewTarget)
+	FORCEINLINE void SetTarget(APawn* NewTarget)
 	{
+		UE_LOG(LogTemp, Log, TEXT("Set Target"));
 		Target = NewTarget;
 	}
 
@@ -86,6 +89,9 @@ public:
 
 protected:
 	// 필요한 에셋 로드 함수
+
+	// 컴포넌트의 델리게이트 바인딩 하려고 필요
+	virtual void PostInitializeComponents() override;
 public:	
 
 protected:
@@ -93,9 +99,11 @@ protected:
 	// 추후 여러명 이 나오면 일단 가까운 놈을 노리는 방식으로 하던가, 위험도에 따른것으로 하던가
 	// 일단은 자신을 때린 놈을 타겟으로 잡음
 	// 한번 정해지면 변경 못하게 막을듯
-	TObjectPtr<AActor> Target;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Target);
+	TObjectPtr<class APawn> Target;
 
 	// 감지를 위한 컴포넌트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sens)
 	TObjectPtr<class UPHMonsterSensingComponent> SensingComponent;
 
 	// 스탯 컴포넌트
