@@ -559,36 +559,38 @@ void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
 
 void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 {
-	//무기가 가득 안차있으면 실행 차단
-	if (!EquipmentComponent->IsFullWeaponInventory())
-	{
-		return;
-	}
 	// 무기 컴포넌트에서 현재 무기와 보조 무기의 위치를 바꿈
 	// 마우스 휠로 값을 받아옴
-
 	float ScrollValue = Value.Get<float>();
 
-	// 양수
+	// 방향 설정
 	if (ScrollValue > 0.0f)
 	{
 		SwapDirection = 1;
 	}
-	// 음수
 	else if(ScrollValue < 0.0f)
 	{
 		SwapDirection = -1;
 	}
 
-	if (SwapDirection != 0)
+	// 유요한지 방향인지 확인
+	if (SwapDirection == 0)
 	{
-		// 몽타주 실행
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance != nullptr)
-		{
-			// TODO : 몽타주 실행중 다시 실행하지 말라고 플래그값 세우기
-			AnimInstance->Montage_Play(ChangeWeaponMontage, 1.2f);
-		}
+		return;
+	}
+
+	// 스왑이 가능한지 확인
+	if (!EquipmentComponent->CanSwapWeapon(SwapDirection))
+	{
+		return;
+	}
+
+	// 몽타주 실행
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance != nullptr)
+	{
+		// TODO : 몽타주 실행중 다시 실행하지 말라고 플래그값 세우기
+		AnimInstance->Montage_Play(ChangeWeaponMontage, 1.2f);
 	}
 }
 

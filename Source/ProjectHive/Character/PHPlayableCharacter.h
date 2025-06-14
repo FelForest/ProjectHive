@@ -313,5 +313,4 @@ protected:
 
 	UPROPERTY()
 	int32 SwapDirection;
-
 };

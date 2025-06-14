@@ -6,6 +6,7 @@
 #include "Components/PHMonsterStatComponent.h"
 #include "Engine/OverlapResult.h"
 #include "AI/PHMonsterController.h"
+#include "Interface/PHSensingAIInterface.h"
 
 // Sets default values
 APHMonsterBase::APHMonsterBase()
@@ -23,7 +24,7 @@ APHMonsterBase::APHMonsterBase()
 
 void APHMonsterBase::CallAlertTarget()
 {
-	if (Target == nullptr)
+	if (GetTarget() == nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("TargtActor is nullptr"));
 		return;
@@ -59,7 +60,7 @@ void APHMonsterBase::CallAlertTarget()
 
 			if (APHMonsterBase* NearyMonster = Cast<APHMonsterBase>(OverlapActor))
 			{
-				NearyMonster->SetTarget(Target);
+				NearyMonster->SetTarget(GetTarget());
 			}
 		}
 	}
@@ -84,9 +85,8 @@ void APHMonsterBase::CallAlertDestination()
 
 void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 {
-	
 	// 이미 있으면 무시
-	if (Target != nullptr)	
+	if (GetTarget() != nullptr)	
 	{
 		return;
 	}
@@ -103,6 +103,38 @@ void APHMonsterBase::CallAlertDestinationBegin(FVector NewDestination)
 	// 몽타주 실행
 }
 
+void APHMonsterBase::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// 매번 캐스팅 하는게 대신 빙의 한번만 할떄 하는 것으로 설정
+	if (NewController->GetClass()->ImplementsInterface(UPHSensingAIInterface::StaticClass()))
+	{
+		SensingAI.SetObject(NewController);
+		SensingAI.SetInterface(Cast<IPHSensingAIInterface>(NewController));
+	}
+}
+
+void APHMonsterBase::SetTarget(APawn* NewTarget)
+{
+	//UE_LOG(LogTemp, Log, TEXT("Set Target"));
+	if (SensingAI == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SensingAI is nullptr"));
+	}
+	SensingAI->SetTarget(NewTarget);
+}
+
+APawn* APHMonsterBase::GetTarget() const
+{
+	if (SensingAI == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SensingAI is nullptr"));
+		return nullptr;
+	}
+	return SensingAI->GetTarget();
+}
+
 float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
@@ -110,7 +142,7 @@ float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 	// 맞은 부위 쪽으로 돌려야 하니까->포인터로 받은다음-> 캐릭터 중심-> 맞은 곳 방향 구해서 돌리면 됨
 	UE_LOG(LogTemp, Log, TEXT("Attacked!!"));
 
-	if (Target != nullptr)
+	if (GetTarget() != nullptr)
 	{
 
 	}

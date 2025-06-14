@@ -19,8 +19,6 @@ APHMonsterController::APHMonsterController()
 	{
 		BTAsset = BTAssetRef.Object;
 	}
-
-
 }
 
 void APHMonsterController::RunAI()
@@ -47,4 +45,15 @@ void APHMonsterController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 
 	RunAI();
+}
+
+void APHMonsterController::SetTarget(APawn* NewPawn)
+{
+	GetBlackboardComponent()->SetValueAsObject(TEXT("Target"), NewPawn);
+	Target = NewPawn;
+}
+
+APawn* APHMonsterController::GetTarget() const
+{
+	return Target;
 }

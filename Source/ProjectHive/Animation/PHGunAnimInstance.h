@@ -49,9 +49,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class UCharacterMovementComponent> Movement;
 
+	// 무기를 관리하는 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class UPHWeaponComponent> WeaponComponent;
 
+	// 현재 장착중인 무기
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	TObjectPtr<class APHWeapon> Weapon;
 

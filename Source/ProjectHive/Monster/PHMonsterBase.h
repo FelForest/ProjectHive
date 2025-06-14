@@ -58,19 +58,15 @@ public:
 	UFUNCTION()
 	virtual void CallAlertDestinationBegin(FVector NewLocation) override;
 
+	// 컨트롤러가 있다는것을 보장이 가능한 함수
+	virtual void PossessedBy(AController* NewController) override;
+
 	// Target 설정함수
 	UFUNCTION()
-	FORCEINLINE void SetTarget(APawn* NewTarget)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Set Target"));
-		Target = NewTarget;
-	}
+	void SetTarget(APawn* NewTarget);
 
 	UFUNCTION()
-	FORCEINLINE AActor* GetTarget() const
-	{
-		return Target;
-	}
+	APawn* GetTarget() const;
 
 	UFUNCTION()
 	FORCEINLINE void SetDestination(FVector NewDestination)
@@ -95,13 +91,6 @@ protected:
 public:	
 
 protected:
-	// 현재는 타겟일 하나여서 이런데 추후 타겟이 여러개로 만드는 방식으로 하든지 아니면 위험도에 따라 타겟을 정하게 하는 방식으로 할듯
-	// 추후 여러명 이 나오면 일단 가까운 놈을 노리는 방식으로 하던가, 위험도에 따른것으로 하던가
-	// 일단은 자신을 때린 놈을 타겟으로 잡음
-	// 한번 정해지면 변경 못하게 막을듯
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Target);
-	TObjectPtr<class APawn> Target;
-
 	// 감지를 위한 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sens)
 	TObjectPtr<class UPHMonsterSensingComponent> SensingComponent;
@@ -122,4 +111,8 @@ protected:
 	// 죽었는지 아닌지 확인용 변수
 	UPROPERTY()
 	uint8 bisDead : 1;
+
+private:
+	UPROPERTY()
+	TScriptInterface<class IPHSensingAIInterface> SensingAI;
 };

@@ -4,6 +4,7 @@
 #include "Animation/PHGunAnimInstance.h"
 #include "Character/PHPlayableCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "KismetAnimationLibrary.h"
 #include "Weapon/PHWeaponComponent.h"
 #include "Item/Equipment/Weapon/Gun/PHGun.h"
 
@@ -67,7 +68,7 @@ void UPHGunAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Rotation = Owner->GetActorRotation();
 
 	// 조준방향과 이동방향의 각도 계산
-	AimDirection = CalculateDirection(Velocity, Rotation);
+	AimDirection = UKismetAnimationLibrary::CalculateDirection(Velocity, Rotation);
 }
 
 void UPHGunAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)

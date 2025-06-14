@@ -54,7 +54,10 @@ public:
 	void SwapWeapon(int32 Direction);
 
 	UFUNCTION()
-	bool IsFullWeaponInventory();
+	bool IsFullWeaponInventory() const;
+
+	UFUNCTION()
+	bool CanSwapWeapon(int32 Direction);
 
 public:	
 	FOnEquipmentEquippedDelegate OnEquipmentEquipped;

@@ -196,9 +196,15 @@ void UPHEquipmentComponent::SwapWeapon(int32 Direction)
 	CurrentWeaponIndex = NextWeaponIndex;
 }
 
-bool UPHEquipmentComponent::IsFullWeaponInventory()
+bool UPHEquipmentComponent::IsFullWeaponInventory() const
 {
 	return WeaponCount == WeaponInventorySize;
+}
+
+bool UPHEquipmentComponent::CanSwapWeapon(int32 Direction)
+{
+	int32 NextWeaponNum = (CurrentWeaponIndex + Direction + WeaponInventorySize) % WeaponInventorySize;
+	return WeaponInventory[NextWeaponNum] != nullptr;
 }
 
 //void UPHEquipmentComponent::SetDropLocation(const FVector& InDropLocation)
