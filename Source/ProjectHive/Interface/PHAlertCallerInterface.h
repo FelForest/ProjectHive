@@ -36,4 +36,5 @@ public:
 	virtual void CallAlertDestinationEnd(class UAnimMontage* Montage, bool bInterrupted) = 0;
 
 	virtual bool IsAlerting() = 0;
+	virtual void SetIsAlerting(bool InIsAlerting) = 0;
 };

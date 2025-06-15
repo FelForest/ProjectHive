@@ -123,7 +123,7 @@ void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 
 	SetTarget(NewTarget);
 
-	CallAlertTarget();
+	//CallAlertTarget();
 
 	if (MonsterMontages->BeginAlertMontage == nullptr)
 	{
@@ -174,6 +174,11 @@ void APHMonsterBase::CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterr
 bool APHMonsterBase::IsAlerting()
 {
 	return bIsAlerting;
+}
+
+void APHMonsterBase::SetIsAlerting(bool InIsAlerting)
+{
+	bIsAlerting = InIsAlerting;
 }
 
 void APHMonsterBase::PossessedBy(AController* NewController)
