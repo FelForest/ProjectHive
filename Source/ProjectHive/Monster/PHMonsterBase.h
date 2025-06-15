@@ -68,6 +68,9 @@ public:
 	UFUNCTION()
 	virtual bool IsAlerting() override;
 
+	UFUNCTION()
+	virtual void SetIsAlerting(bool InIsAlerting) override;
+
 	// 컨트롤러가 있다는것을 보장이 가능한 함수
 	virtual void PossessedBy(AController* NewController) override;
 
