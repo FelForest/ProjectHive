@@ -31,6 +31,10 @@ protected:
 
 	virtual APawn* GetTarget() const override;
 
+	virtual void SetDestination(FVector NewDestination) override;
+
+	virtual FVector GetDestination() const override;
+
 protected:
 	// Blackboard 애셋
 	UPROPERTY()
@@ -47,4 +51,7 @@ protected:
 	// 한번 정해지면 변경 못하게 막을듯
 	UPROPERTY()
 	TObjectPtr<APawn> Target;
+
+	UPROPERTY()
+	FVector Destination;
 };

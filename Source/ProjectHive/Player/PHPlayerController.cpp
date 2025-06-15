@@ -3,9 +3,27 @@
 
 #include "Player/PHPlayerController.h"
 #include "Interface/PHInteractableInterface.h"
+#include "UI/PHHUDWidget.h"
 
 APHPlayerController::APHPlayerController()
 {
+	static ConstructorHelpers::FClassFinder<UPHHUDWidget> PHHUDWidgetRef(TEXT("/Game/ProjectHive/UI/WBP_HUD.WBP_HUD_C"));
+	if (PHHUDWidgetRef.Class)
+	{
+		PHHUDWidgetClass = PHHUDWidgetRef.Class;
+	}
+}
+
+void APHPlayerController::OnPossess(APawn* aPawn)
+{
+	Super::OnPossess(aPawn);
+
+	PHHUDWidget = CreateWidget<UPHHUDWidget>(this, PHHUDWidgetClass);
+	if (PHHUDWidget != nullptr)
+	{
+		PHHUDWidget->AddToViewport();
+	}
+
 }
 
 void APHPlayerController::ShowInteractUI(AActor* Target)

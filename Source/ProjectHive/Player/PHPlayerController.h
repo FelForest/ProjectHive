@@ -17,6 +17,8 @@ class PROJECTHIVE_API APHPlayerController : public APlayerController
 public:
 	APHPlayerController();
 
+	virtual void OnPossess(APawn* aPawn) override;
+
 	UFUNCTION()
 	void ShowInteractUI(class AActor* Target);
 
@@ -28,4 +30,12 @@ public:
 
 	UFUNCTION()
 	void ShowMouseCursor(bool IsShow);
+
+	// HUD Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class UPHHUDWidget> PHHUDWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUd)
+	TObjectPtr<class UPHHUDWidget> PHHUDWidget;
 };

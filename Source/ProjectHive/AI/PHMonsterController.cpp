@@ -57,3 +57,14 @@ APawn* APHMonsterController::GetTarget() const
 {
 	return Target;
 }
+
+void APHMonsterController::SetDestination(FVector NewDestination)
+{
+	GetBlackboardComponent()->SetValueAsVector(FName("Destination"), NewDestination);
+	Destination = NewDestination;
+}
+
+FVector APHMonsterController::GetDestination() const
+{
+	return Destination;
+}

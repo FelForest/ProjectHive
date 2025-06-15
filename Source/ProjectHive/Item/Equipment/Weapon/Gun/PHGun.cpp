@@ -51,7 +51,7 @@ void APHGun::Fire()
 	// 발사 결과를 받는 구조체
 	FHitResult HitResult;
 
-	const bool Hit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_GameTraceChannel16);
+	const bool Hit = GetWorld()->LineTraceSingleByProfile(HitResult, TraceStart, TraceEnd, FName("Monster"));
 
 	// 의문인게 이미 여기에서 맞았는지 아닌지 확인하는데
 	if (Hit)

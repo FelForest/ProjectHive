@@ -9,6 +9,8 @@
 
 #include "Interface/PHWeaponAnimOwnerInterface.h"
 
+#include "GameFramework/Pawn.h"
+
 // Sets default values for this component's properties
 UPHWeaponComponent::UPHWeaponComponent()
 {
@@ -56,9 +58,22 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 		return;
 	}
 
+	APawn* NewPawn = Cast<APawn>(GetOwner());
+	if (NewPawn == nullptr)
+	{
+		return;
+	}
+
 	// 무기 설정
 	CurrentWeapon = NewWeapon;	
 	EWeaponType WeaponType = CurrentWeapon->GetWeaponType();
+
+	// Owner , Instigator 설정
+	CurrentWeapon->SetOwner(GetOwner());
+	
+	// 없을리가 없기는 한데 혹시 모르니까 nullptr 확인
+	
+	CurrentWeapon->SetInstigator(NewPawn);
 
 	// 여기서 어떤 무기인지 분기로 나누어야함
 	if (WeaponSetupFunc* WeaponSetupFunc = WeaponSettingMap.Find(WeaponType))

@@ -50,6 +50,7 @@ public:
 	virtual void CallAlertTarget() override;
 
 	// 특정 위치에 가라고 알리는 함수
+	// 이것을 여기서 정의하는게 의미가 있는지 모르겠음 -> 여기는 어디까지나 추상 클래스임
 	virtual void CallAlertDestination() override;
 
 	// 몽타주 호출을 위한 함수
@@ -57,6 +58,15 @@ public:
 	virtual void CallAlertTargetBegin(APawn* NewTarget) override;
 	UFUNCTION()
 	virtual void CallAlertDestinationBegin(FVector NewLocation) override;
+
+	UFUNCTION()
+	virtual void CallAlertTargetEnd(UAnimMontage* Montage, bool bInterrupted) override;
+
+	UFUNCTION()
+	virtual void CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterrupted) override;
+
+	UFUNCTION()
+	virtual bool IsAlerting() override;
 
 	// 컨트롤러가 있다는것을 보장이 가능한 함수
 	virtual void PossessedBy(AController* NewController) override;
@@ -69,19 +79,16 @@ public:
 	APawn* GetTarget() const;
 
 	UFUNCTION()
-	FORCEINLINE void SetDestination(FVector NewDestination)
-	{
-		Destination = NewDestination;
-	}
+	void SetDestination(FVector NewDestination);
 
 	UFUNCTION()
-	FORCEINLINE FVector GetDestination() const
-	{
-		return Destination;
-	}
+	FVector GetDestination() const;
 
 	// 피격 받았을때 처리할 함수
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	// 체력이 없어 죽었을때 호출한 함수
+	virtual void OnDead();
 
 protected:
 	// 필요한 에셋 로드 함수
@@ -110,9 +117,26 @@ protected:
 
 	// 죽었는지 아닌지 확인용 변수
 	UPROPERTY()
-	uint8 bisDead : 1;
+	uint8 bIsDead : 1;
+
+	UPROPERTY()
+	UAnimInstance* AnimInstance;
+
+	// 얼마나 포효할지 정하는 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Alert)
+	float AlertTime;
+
+	UPROPERTY()
+	uint8 bIsAlerting : 1;
+
+	UPROPERTY()
+	uint8 bIsInCombat : 1;
 
 private:
 	UPROPERTY()
 	TScriptInterface<class IPHSensingAIInterface> SensingAI;
+
+	// 기본적으로 필요한 몬스터 몽타주 데이터 에셋
+	UPROPERTY()
+	TObjectPtr<class UPHMonsterMontageAsset> MonsterMontages;
 };

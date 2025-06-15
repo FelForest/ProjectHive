@@ -30,4 +30,10 @@ public:
 
 	UFUNCTION()
 	virtual APawn* GetTarget() const = 0;
+
+	UFUNCTION()
+	virtual void SetDestination(FVector NewDestination) = 0;
+
+	UFUNCTION()
+	virtual FVector GetDestination() const = 0;
 };

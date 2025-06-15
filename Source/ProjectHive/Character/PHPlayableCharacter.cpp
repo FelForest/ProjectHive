@@ -734,6 +734,8 @@ void APHPlayableCharacter::OnWeaponEquipped()
 {
 	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지하기 위해 다음 프레임에서 캐릭터 애니메이션 변경 
 	GetWorldTimerManager().SetTimerForNextTick(this, &APHPlayableCharacter::OnDeferredWeaponEquipped);
+
+	//
 }
 
 void APHPlayableCharacter::OnWeaponUnequipped()
