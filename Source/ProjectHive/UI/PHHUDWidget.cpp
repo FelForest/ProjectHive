@@ -2,7 +2,10 @@
 
 
 #include "UI/PHHUDWidget.h"
+
 #include "Components/RadialSlider.h"
+#include "Components/TextBlock.h"
+
 #include "Item/Equipment/Weapon/Gun/PHGun.h"
 
 // TODO : 인터페이스로 바꾸기 필요
@@ -49,11 +52,19 @@ void UPHHUDWidget::UpdateGunUI(const FGunState& NewGunState)
 {
 	// 받아온 총의 데이터 설정
 	UE_LOG(LogTemp, Log, TEXT("GunUIUpdate"));
+
+	AmmoString = FString::Printf(TEXT("%d / %d"), NewGunState.CurrentAmmo, NewGunState.MaxAmmo);
+	AmmoText->SetText(FText::FromString(AmmoString));
+
+	MagazineString = FString::Printf(TEXT("X %d"), NewGunState.CurrentMagazine);
+	MagazineText->SetText(FText::FromString(MagazineString));
 }
 
 void UPHHUDWidget::SetupGunUI(const APHGun* NewGun)
 {
 	UE_LOG(LogTemp, Log, TEXT("SetUpGunUI"));
+
+	UpdateGunUI(NewGun->GetGunState());
 }
 
 void UPHHUDWidget::NativeConstruct()
@@ -63,21 +74,37 @@ void UPHHUDWidget::NativeConstruct()
 	// HP 설정
 	FrontHPSlider = Cast<URadialSlider>(GetWidgetFromName(TEXT("FrontHPSlider")));
 
-	if (FrontHPSlider != nullptr)
+	if (FrontHPSlider == nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("FrontHPSlider is nullptr"));
 	}
 
 	BackHPSlider = Cast<URadialSlider>(GetWidgetFromName(TEXT("BackHPSlider")));
 
-	if (BackHPSlider != nullptr)
+	if (BackHPSlider == nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("BackHPSlider is nullptr"));
 	}
 
 	// 총 설정
+	AmmoText = Cast<UTextBlock>(GetWidgetFromName(TEXT("Ammo")));
 	
+	if (AmmoText == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AmmoText is nullptr"));
+	}
 
+	AmmoText->SetText(FText::FromString(TEXT("00 / 00")));
+
+
+	MagazineText = Cast<UTextBlock>(GetWidgetFromName(TEXT("Magazine")));
+
+	if (MagazineText == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("MagazineText is nullptr"));
+	}
+
+	MagazineText->SetText(FText::FromString(TEXT("X 0")));
 
 	APHPlayableCharacter* PlayableCharacter = Cast<APHPlayableCharacter>(GetOwningPlayer()->GetPawn());
 

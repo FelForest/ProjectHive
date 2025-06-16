@@ -55,4 +55,16 @@ protected:
 
 	UPROPERTY()
 	float TargetHp;
+
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> AmmoText;
+
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> MagazineText;
+
+	UPROPERTY()
+	FString AmmoString;
+
+	UPROPERTY()
+	FString MagazineString;
 };
