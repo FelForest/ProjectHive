@@ -106,6 +106,9 @@ public:
 
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	UFUNCTION()
+	void SetUpHUD(class UPHHUDWidget* InHUDWidget);
+
 protected:
 	// ConstructorHelpers 너무 길어서 따로 뺌
 	void LoadAssets();
@@ -244,16 +247,6 @@ protected:
 
 	UPROPERTY()
 	FVector MouseLocation;
-
-	// MoveSpeed Section
-	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "true"))
-	float WalkSpeed;
-
-	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "true"))
-	float AimSpeed;
-
-	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "true"))
-	float RunSpeed;
 
 	UPROPERTY()
 	uint8 bIsRunning : 1;

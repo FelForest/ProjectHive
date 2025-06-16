@@ -18,7 +18,7 @@ void UPHMonsterAttackNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 
 	if (AttackInterface == nullptr)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Notify AttackInterface is nullptr"));
+		//UE_LOG(LogTemp, Log, TEXT("Notify AttackInterface is nullptr"));
 		return;
 	}
 

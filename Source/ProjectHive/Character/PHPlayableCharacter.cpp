@@ -43,6 +43,8 @@
 // 임시용
 #include "Player/PHPlayerController.h"
 
+// UI Section
+#include "UI/PHHUDWidget.h"
 
 
 APHPlayableCharacter::APHPlayableCharacter()
@@ -52,6 +54,9 @@ APHPlayableCharacter::APHPlayableCharacter()
 
 	// Tick 활성화
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Setting Stat
+	StatComponent = CreateDefaultSubobject<UPHCharacterStatComponent>(TEXT("StatComponent"));
 
 	// Setting Weapon 
 	WeaponComponent = CreateDefaultSubobject<UPHWeaponComponent>(TEXT("WeaponComponent"));
@@ -83,9 +88,6 @@ APHPlayableCharacter::APHPlayableCharacter()
 
 	// 이게 가능한 이유 : 맴버 변수로 가지고 있어서 이게 먼저 초기화되는게 보장됨
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-	AimSpeed = 250.0f;
-	WalkSpeed = 500.0f;
-	RunSpeed = 750.0f;
 	bIsRunning = false;
 
 	// Setting Aim
@@ -199,7 +201,7 @@ void APHPlayableCharacter::BeginPlay()
 
 	// Setting Movement
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = StatComponent->WalkMovementSpeed;
 
 	// Setting Timeline
 	InitializeTimeLine();
@@ -323,8 +325,29 @@ float APHPlayableCharacter::TakeDamage(float Damage, FDamageEvent const& DamageE
 {
 	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
-
+	StatComponent->ChangeHP(Damage);
 	return 0.0f;
+}
+
+void APHPlayableCharacter::SetUpHUD(UPHHUDWidget* InHUDWidget)
+{
+	if (InHUDWidget == nullptr)
+	{
+		return;
+	}
+
+	// HP 업데이트
+	InHUDWidget->UpdateHP(StatComponent->HpPersent);
+
+	StatComponent->OnHPChange.AddUObject(InHUDWidget, &UPHHUDWidget::UpdateHP);
+
+	// 여기서 무기UI업데이트 필요
+	WeaponComponent->OnGunEquipped.AddUObject(InHUDWidget, &UPHHUDWidget::SetupGunUI);
+	WeaponComponent->SetWeapon(GetWeaponComponent()->GetWeapon());
+
+	WeaponComponent->OnGunUpdate.AddUObject(InHUDWidget, &UPHHUDWidget::UpdateGunUI);
+
+	// 무기 버리는거 업데이트
 }
 
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
@@ -412,8 +435,7 @@ void APHPlayableCharacter::SetMappingContext()
 		DefaultMappingContext = CharacterInputActionData->CharacterInputMapping;
 	}
 
-	APHPlayerController* PHPlayerController = CastChecked<APHPlayerController>(GetController());
-	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PHPlayerController->GetLocalPlayer()))
+	if (auto SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		SubSystem->ClearAllMappings();
 		SubSystem->AddMappingContext(DefaultMappingContext, 0);
@@ -444,15 +466,15 @@ void APHPlayableCharacter::SetMovementSpeed()
 {
 	if (bIsAiming)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = StatComponent->AimMovementSpeed;
 	}
 	else if (bIsRunning)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = StatComponent->RunMovementSpeed;
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = StatComponent->WalkMovementSpeed;
 	}
 }
 
@@ -517,7 +539,7 @@ void APHPlayableCharacter::AimStart(const FInputActionValue& Value)
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	bIsAiming = true;
 	// 이동속도 조절
-	GetCharacterMovement()->MaxWalkSpeed = AimSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = StatComponent->AimMovementSpeed;
 
 	// 회전 타임라인 초기화
 	SettingRotationTimeline.SetPlaybackPosition(0.0f, false, false);
@@ -707,14 +729,13 @@ void APHPlayableCharacter::PostInitializeComponents()
 	// 무기컴포넌트에 알려주기 위한 바인딩
 	EquipmentComponent->OnEquipmentEquipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::SetWeapon);
 	EquipmentComponent->OnEquipmentUnequipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::ClearWeapon);
-
-	// 장비에 대한 UI 바인딩
-
 }
 
 void APHPlayableCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	PlayerController = CastChecked<APHPlayerController>(NewController);
 }
 
 void APHPlayableCharacter::OnDeferredWeaponEquipped()
@@ -735,7 +756,7 @@ void APHPlayableCharacter::OnWeaponEquipped()
 	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지하기 위해 다음 프레임에서 캐릭터 애니메이션 변경 
 	GetWorldTimerManager().SetTimerForNextTick(this, &APHPlayableCharacter::OnDeferredWeaponEquipped);
 
-	//
+	// 여기서 브로드 캐스트 해주는게 맞는거 같기는한데...->이거 몽타주에서 해줘야 하는건가?
 }
 
 void APHPlayableCharacter::OnWeaponUnequipped()

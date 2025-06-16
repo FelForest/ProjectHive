@@ -7,6 +7,9 @@
 #include "PHCharacterStatComponent.generated.h"
 
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHPChange, float /*HP*/);
+DECLARE_MULTICAST_DELEGATE(FOnDead);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTHIVE_API UPHCharacterStatComponent : public UActorComponent
 {
@@ -20,11 +23,25 @@ public:
 	UFUNCTION()
 	void InitializeStat();
 
-protected:
+	UFUNCTION()
+	void ChangeHP(float InDamage);
+
+public:
+	FOnHPChange OnHPChange;
+
+	FOnDead OnDead;
+
+public:
 
 	// 체력
 	UPROPERTY()
+	float MaxHp;
+
+	UPROPERTY()
 	float Hp;
+
+	UPROPERTY()
+	float HpPersent;
 
 	// 공격력
 	UPROPERTY()
@@ -35,6 +52,12 @@ protected:
 	float AttackSpeed;
 
 	// 이동 속도
-	UPROPERTY()
-	float MovementSpeed;
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "true"))
+	float WalkMovementSpeed;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "true"))
+	float RunMovementSpeed;
+
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = MoveSpeed, meta = (AllowPrivateAccess = "true"))
+	float AimMovementSpeed;
 };

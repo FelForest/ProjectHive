@@ -8,6 +8,7 @@
 #include "AI/PHMonsterController.h"
 #include "Interface/PHSensingAIInterface.h"
 #include "Data/Monster/PHMonsterMontageAsset.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APHMonsterBase::APHMonsterBase()
@@ -123,7 +124,7 @@ void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 
 	SetTarget(NewTarget);
 
-	//CallAlertTarget();
+	CallAlertTarget();
 
 	if (MonsterMontages->BeginAlertMontage == nullptr)
 	{
@@ -254,7 +255,8 @@ float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 	// 현재 전투중으로 변경
 	bIsInCombat = true;
 
-	OnDead();
+	StatComponent->ChangeHP(Damage);
+
 	return 0.0f;
 }
 
@@ -271,6 +273,7 @@ void APHMonsterBase::OnDead()
 	{
 		AnimInstance->Montage_Play(MonsterMontages->DieMontage, 1.2f);
 	}
+	Destroy();
 }
 
 void APHMonsterBase::PostInitializeComponents()
@@ -282,5 +285,11 @@ void APHMonsterBase::PostInitializeComponents()
 
 	// 찾았을때 주위에 알리기 위한 함수 바인딩
 	SensingComponent->OnSeePawn.AddDynamic(this, &APHMonsterBase::CallAlertTargetBegin);
+
+	// 스탯 설정
+	GetCharacterMovement()->MaxWalkSpeed = StatComponent->GetMoveSpeed();
+
+	// 데미지 받았을때 죽었는지 확인하는 바인딩
+	StatComponent->OnDead.AddUObject(this, &APHMonsterBase::OnDead);
 }
 

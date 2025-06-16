@@ -67,6 +67,7 @@ void APHGun::Fire()
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f, 0, 1.0f);
 #endif
 
+	OnGunUpdate.Broadcast(GetGunState());
 }
 
 void APHGun::ReloadStart()
@@ -80,7 +81,7 @@ void APHGun::Reload()
 	CurrentMagazine -= 1;
 	CurrentAmmo = MaxAmmo;
 	// 캐릭터에서 실행하는거여서 모르겠다
-	OnReload.Broadcast(CurrentAmmo, CurrentMagazine);
+	OnGunUpdate.Broadcast(GetGunState());
 }
 
 void APHGun::ReloadEnd()
@@ -169,6 +170,17 @@ UPHGunMontageDataAsset* APHGun::GetGunMontageData()
 bool APHGun::CanReload() const
 {
 	return (!IsReloading() && CurrentMagazine > 0);
+}
+
+FGunState APHGun::GetGunState() const
+{
+	FGunState State;
+	State.CurrentAmmo = CurrentAmmo;
+	State.CurrentMagazine = CurrentMagazine;
+	State.MaxAmmo = MaxAmmo;
+	State.MaxMagazine = MaxMagazine;
+
+	return State;
 }
 
 

@@ -18,7 +18,27 @@
  * 발사 및 재장전시 델리게이트 발행
  */
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReload, int32 /*현재 탄환*/, int32 /*현재 탄창*/)
+
+// UI 업데이트를 위한 구조체
+USTRUCT(BlueprintType)
+struct FGunState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
+	int32 MaxAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
+	int32 CurrentAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
+	int32 MaxMagazine;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GunData)
+	int32 CurrentMagazine;
+};
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGunUpdate, const FGunState&);
 
 UCLASS()
 class PROJECTHIVE_API APHGun : public APHWeapon,
@@ -77,6 +97,9 @@ public:
 	UFUNCTION()
 	virtual bool CanReload() const override;
 
+	UFUNCTION()
+	FGunState GetGunState() const;
+
 protected:
 	void SetIsReloading(bool bInIsReloading);
 
@@ -84,7 +107,7 @@ protected:
 	void ResetCanFire();
 
 public:
-	FOnReload OnReload;
+	FOnGunUpdate OnGunUpdate;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InitLocation)

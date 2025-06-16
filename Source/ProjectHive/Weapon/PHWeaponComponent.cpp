@@ -15,6 +15,7 @@
 UPHWeaponComponent::UPHWeaponComponent()
 {
 	WeaponSettingMap.Add(EWeaponType::Gun, &UPHWeaponComponent::SetGun);
+	WeaponRemoveDelegateMap.Add(EWeaponType::Gun, &UPHWeaponComponent::RemoveGun);
 }
 
 void UPHWeaponComponent::Attack()
@@ -28,8 +29,15 @@ void UPHWeaponComponent::Attack()
 void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 {
 	// 기존의 장비가 변경되는 경우에도 이 함수 호출
-	// 이때 먼저 장비가 있는지 확인 후 기존의 바인딩된 함수 다 제거해야함
-	
+	// 종류에 따라 바인딩 해제를 다르게 해야하는데..
+
+	if (CurrentWeapon != nullptr)
+	{
+		if (WeaponRemoveDelegateFunc* WeaponRemoveDelegateFunc = WeaponRemoveDelegateMap.Find(CurrentWeapon->GetWeaponType()))
+		{
+			(this->* * WeaponRemoveDelegateFunc)(CurrentWeapon);
+		}
+	}
 
 	IPHWeaponAnimOwnerInterface* WeaponOwner = Cast<IPHWeaponAnimOwnerInterface>(GetOwner());
 	if (WeaponOwner == nullptr)
@@ -64,6 +72,8 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 		return;
 	}
 
+
+
 	// 무기 설정
 	CurrentWeapon = NewWeapon;	
 	EWeaponType WeaponType = CurrentWeapon->GetWeaponType();
@@ -78,14 +88,15 @@ void UPHWeaponComponent::SetWeapon(APHEquipment* InWeapon)
 	// 여기서 어떤 무기인지 분기로 나누어야함
 	if (WeaponSetupFunc* WeaponSetupFunc = WeaponSettingMap.Find(WeaponType))
 	{
-		(this->** WeaponSetupFunc)();
+		(this->**WeaponSetupFunc)();
 	}
 
 
 	// TODO : 발사 결과 값에 따라 애니메이션 다르게 하려고함
 	// 바인딩 위치는 여기가 맞다고 판단
 	// 캐릭터를 인터페이스로 캐스팅 후 바인딩할 예정
-	
+	// 바인딩은 각자 무기마다 다르니까 setupFunc에서 하는게 맞음
+
 	WeaponOwner->OnWeaponEquipped();
 }
 
@@ -96,8 +107,12 @@ void UPHWeaponComponent::ClearWeapon(APHEquipment* InWeapon)
 		UE_LOG(LogTemp, Warning, TEXT("Weapon is Clear"));
 		// TODO : 기존 무기가 바인딩된 함수 제거 필요
 
-		CurrentWeapon->SetIsEquipped(false);
+		if (CurrentWeapon->GetWeaponType() == EWeaponType::Gun)
+		{
+			RemoveGun(CurrentWeapon);
+		}
 
+		CurrentWeapon->SetIsEquipped(false);
 		CurrentWeapon = nullptr;
 	}
 }
@@ -169,6 +184,11 @@ void UPHWeaponComponent::ReloadEnd(UAnimMontage* Montage, bool bInterrupted)
 	}
 }
 
+void UPHWeaponComponent::UpdateGunInfo(const FGunState& NewGunState)
+{
+	OnGunUpdate.Broadcast(NewGunState);
+}
+
 void UPHWeaponComponent::InitializeWeaponMesh(USkeletalMeshComponent* CharacterMesh)
 {
 
@@ -223,9 +243,24 @@ void UPHWeaponComponent::SetGun()
 		UE_LOG(LogTemp, Log, TEXT("ThrowMontage is nullptr"));
 	}
 
+
+	// 델리게이트 세팅
+	NewGun->OnGunUpdate.AddUObject(this, &UPHWeaponComponent::UpdateGunInfo);
+
+
 	// TODO : 델리게이트로 알맞은 UI 호출하게 해야함
 	// 넘겨줄 데이터, 무기 이미지
 	OnGunEquipped.Broadcast(NewGun);
+}
+
+void UPHWeaponComponent::RemoveGun(APHWeapon* InCurrentWeapon)
+{
+	APHGun* InGun = Cast<APHGun>(InCurrentWeapon);
+	if (InGun != nullptr)
+	{
+		InGun->OnGunUpdate.RemoveAll(this);
+		OnGunUnequipped.Broadcast(InGun);
+	}
 }
 
 
