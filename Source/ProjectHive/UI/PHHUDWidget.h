@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,12 +7,12 @@
 #include "PHHUDWidget.generated.h"
 
 /**
- * Author		: ÀÓµ¿Çö
+ * Author		: ì„ë™í˜„
  * Date			: 2025-06-16
  * Description	:
  * HUD
- * ÃÑÀÇ µ¥ÀÌÅÍ ¹Ş¾Æ¿Í¼­ ¹Ù²Ù±â
- * Ã¼·Â º¯°æ½Ã ¹Ù²Ù±â
+ * ì´ì˜ ë°ì´í„° ë°›ì•„ì™€ì„œ ë°”ê¾¸ê¸°
+ * ì²´ë ¥ ë³€ê²½ì‹œ ë°”ê¾¸ê¸°
  *
  */
 UCLASS()

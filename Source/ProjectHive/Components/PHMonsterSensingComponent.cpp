@@ -19,9 +19,9 @@ UPHMonsterSensingComponent::UPHMonsterSensingComponent()
 	bHearNoises = false;
 	bSeePawns = true;
 
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	bWantsInitializeComponent = true;
-	bAutoActivate = false;
+	bAutoActivate = true;
 
 	bEnableSensingUpdates = true;
 }

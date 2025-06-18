@@ -7,6 +7,10 @@
 #include "Engine/OverlapResult.h"
 #include "AI/PHMonsterController.h"
 #include "Interface/PHSensingAIInterface.h"
+#include "AI/PHMonsterAIInterface.h"
+#include "Interface/PHCommandMonsterInterface.h"
+
+
 #include "Data/Monster/PHMonsterMontageAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -37,7 +41,7 @@ APHMonsterBase::APHMonsterBase()
 	bIsDead = false;
 
 	// 경고 시간 설정
-	AlertTime = 3.0f;
+	AlertTime = 1.0f;
 
 	// 경고 중인지 아닌지 애니메이션 설정 값을 위한 변수
 	bIsAlerting = false;
@@ -51,11 +55,11 @@ void APHMonsterBase::CallAlertTarget()
 		return;
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("CallAlertTarget"));
 	// 오버랩 결과
 	TArray<FOverlapResult> OverlapResults;
 	const FVector Position = GetActorLocation();
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(GetDefaultHalfHeight() * StatComponent->GetAlertRadius());
-	UE_LOG(LogTemp, Warning, TEXT("%f"), GetDefaultHalfHeight());
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
@@ -65,7 +69,7 @@ void APHMonsterBase::CallAlertTarget()
 	// 오버랩 시작
 	bool bHit = GetWorld()->OverlapMultiByProfile(OverlapResults, Position, FQuat::Identity, TEXT("Monster"), Sphere, Params);
 
-	UE_LOG(LogTemp, Log, TEXT("BeginOverlap"));
+	
 	if (bHit)
 	{
 		// 범위 안의 모든 몬스터 
@@ -77,10 +81,12 @@ void APHMonsterBase::CallAlertTarget()
 				continue;
 			}
 
-			UE_LOG(LogTemp, Log, TEXT("Overlap hit: %s"), *OverlapActor->GetName());
+			//UE_LOG(LogTemp, Log, TEXT("Overlap hit: %s"), *OverlapActor->GetName());
 
 			if (APHMonsterBase* NearyMonster = Cast<APHMonsterBase>(OverlapActor))
 			{
+				NearyMonster->SetCanAlert(false);
+				NearyMonster->SetIsCombat(true);
 				NearyMonster->SetTarget(GetTarget());
 			}
 		}
@@ -97,15 +103,33 @@ void APHMonsterBase::CallAlertTarget()
 		1.0f                      
 	);
 #endif
+
+
+	CallAlertTargetEnd();
 }
 
 void APHMonsterBase::CallAlertDestination()
 {
-
+	// TODO : Commender있으면 알려주기
+	UE_LOG(LogTemp, Log, TEXT("CallAlertDestination"));
+	UE_LOG(LogTemp, Log, TEXT("NewDestination : %f , %f"), Destination.X, Destination.Y);
+	if (Commander != nullptr && !Commander->GetIsDead())
+	{
+		IPHCommandMonsterInterface* InCommander = Cast<IPHCommandMonsterInterface>(Commander);
+		if (InCommander != nullptr)
+		{
+			InCommander->SetNewDestination(Destination);
+		}
+	}
 }
 
 void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 {
+	if (NewTarget == nullptr)
+	{
+		return;
+	}
+
 	// 이미 있으면 무시
 	if (GetTarget() != nullptr)	
 	{
@@ -114,15 +138,21 @@ void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 
 	if (AnimInstance == nullptr)
 	{
+		UE_LOG(LogTemp, Log, TEXT("AnimInstance is nullptr"));
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Alert Target"));
 
+	UE_LOG(LogTemp, Log, TEXT("CallAlertTargetBegin"));
 	// 상위 계층에게 현재 타겟 위치 알려주기-> 모든 객체는 하위에서 상위로 전달시 target자체를 넘길 수 없음
 	// 상위 -> 하위이면 target설정이 가능,
 
 	SetTarget(NewTarget);
+
+	if (Commander != nullptr && !Commander->GetIsCombat())
+	{
+		SetCanAlert(true);
+	}
 
 	CallAlertTarget();
 
@@ -130,31 +160,44 @@ void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 	{
 		return;
 	}
+}
+
+void APHMonsterBase::CallAlertDestinationBegin(APawn* NewTarget)
+{
+	FVector NewDestination;
+	if (NewTarget == nullptr)
+	{
+		NewDestination = GetActorLocation();
+	}
+	else
+	{
+		NewDestination = NewTarget->GetActorLocation();
+	}
+
+	SetDestination(NewDestination);
+
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
 	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &APHMonsterBase::CallAlertTargetEnd);
+	EndDelegate.BindUObject(this, &APHMonsterBase::CallAlertDestinationEnd);
+	AnimInstance->Montage_Play(MonsterMontages->BeginAlertMontage, 1.0f);
+
 	AnimInstance->Montage_SetEndDelegate(EndDelegate, MonsterMontages->BeginAlertMontage);
-
- 	AnimInstance->Montage_Play(MonsterMontages->BeginAlertMontage, 1.0f);
 	bIsAlerting = true;
+	UE_LOG(LogTemp, Log, TEXT("CallAlertDestinationBegin"));
 }
 
-void APHMonsterBase::CallAlertDestinationBegin(FVector NewDestination)
+void APHMonsterBase::CallAlertTargetEnd()
 {
-	SetDestination(NewDestination);
-	if (GetOwner() != nullptr)
-	{
-		
-	}
-}
+	UE_LOG(LogTemp, Log, TEXT("CallAlertTargetEnd"));
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
-void APHMonsterBase::CallAlertTargetEnd(UAnimMontage* Montage, bool bInterrupted)
-{
-	
+	SensingComponent->SetActive(false);
 }
 
 void APHMonsterBase::CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterrupted)
 {
+	UE_LOG(LogTemp, Log, TEXT("CallAlertDestinationEnd"));
 	FTimerHandle AlertTimerHandle;
 
 	GetWorldTimerManager().SetTimer(
@@ -164,7 +207,12 @@ void APHMonsterBase::CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterr
 				if (!AnimInstance->Montage_IsPlaying(MonsterMontages->EndAlertMontage))
 				{
 					AnimInstance->Montage_Play(MonsterMontages->EndAlertMontage, -1.0f);
-					bIsAlerting = false;
+					SetIsAlerting(false);
+					SetIsCombat(true);
+					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+					SetCanAlert(false);
+
+					OnAlertFinished.ExecuteIfBound();
 				}
 			}),
 		AlertTime,
@@ -182,6 +230,11 @@ void APHMonsterBase::SetIsAlerting(bool InIsAlerting)
 	bIsAlerting = InIsAlerting;
 }
 
+void APHMonsterBase::SetMonsterAlertDelegate(const FMonsterAlertFinished& InOnAlertFinished)
+{
+	OnAlertFinished = InOnAlertFinished;
+}
+
 void APHMonsterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -192,6 +245,13 @@ void APHMonsterBase::PossessedBy(AController* NewController)
 		SensingAI.SetObject(NewController);
 		SensingAI.SetInterface(Cast<IPHSensingAIInterface>(NewController));
 	}
+
+	// 매번 캐스팅 하는게 대신 빙의 한번만 할떄 하는 것으로 설정
+	if (NewController->GetClass()->ImplementsInterface(UPHMonsterAIInterface::StaticClass()))
+	{
+		MonsterAI.SetObject(NewController);
+		MonsterAI.SetInterface(Cast<IPHMonsterAIInterface>(NewController));
+	}
 }
 
 void APHMonsterBase::SetTarget(APawn* NewTarget)
@@ -201,6 +261,8 @@ void APHMonsterBase::SetTarget(APawn* NewTarget)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SensingAI is nullptr"));
 	}
+
+	SetIsCombat((NewTarget != nullptr));
 	SensingAI->SetTarget(NewTarget);
 }
 
@@ -222,6 +284,12 @@ void APHMonsterBase::SetDestination(FVector NewDestination)
 		return;
 	}
 	SensingAI->SetDestination(NewDestination);
+	Destination = NewDestination;
+}
+
+float APHMonsterBase::GetAttackRange() const
+{
+	return StatComponent->GetAttackRange();
 }
 
 FVector APHMonsterBase::GetDestination() const
@@ -232,6 +300,43 @@ FVector APHMonsterBase::GetDestination() const
 		return FVector();
 	}
 	return SensingAI->GetDestination();
+}
+
+void APHMonsterBase::SetIsCombat(bool NewIsCombat)
+{
+	MonsterAI->SetIsCombat(NewIsCombat);
+	bIsInCombat = NewIsCombat;
+}
+
+bool APHMonsterBase::GetIsCombat()
+{
+	return bIsInCombat;
+}
+
+void APHMonsterBase::SetCanAlert(bool NewCanAlert)
+{
+	if (MonsterAI == nullptr)
+	{
+		return;
+	}
+
+	MonsterAI->SetCanAlert(NewCanAlert);
+
+	if (!NewCanAlert && Commander != nullptr && !Commander->GetIsCombat())
+	{
+		GetWorldTimerManager().ClearTimer(AlertTimer);
+		GetWorldTimerManager().SetTimer(
+			AlertTimer,
+			this,
+			&APHMonsterBase::ResetCanALert,
+			5.0f,
+			false);
+	}
+}
+
+void APHMonsterBase::ResetCanALert()
+{
+	MonsterAI->SetCanAlert(true);
 }
 
 float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -269,12 +374,42 @@ void APHMonsterBase::OnDead()
 	bIsDead = true;
 
 	// TODO : 죽으면 다른 행동 못하도록 막아야함
+	MonsterAI->StopAI();
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
 	if (AnimInstance != nullptr && MonsterMontages->DieMontage != nullptr)
 	{
-		AnimInstance->Montage_Play(MonsterMontages->DieMontage, 1.2f);
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &APHMonsterBase::FinializeDeath);
+		
+		AnimInstance->Montage_Play(MonsterMontages->DieMontage, 1.0f);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, MonsterMontages->DieMontage);
 	}
+
+
+}
+
+bool APHMonsterBase::GetIsDead() const
+{
+	return bIsDead;
+}
+
+void APHMonsterBase::FinializeDeath(UAnimMontage* Montage, bool bInterrupted)
+{
+	UE_LOG(LogTemp, Log, TEXT("Destroy"));
 	Destroy();
 }
+
+void APHMonsterBase::SetCommander(APHMonsterBase* NewCommander)
+{
+	Commander = NewCommander;
+}
+
+APHMonsterBase* APHMonsterBase::GetCommander()
+{
+	return Commander;
+}
+
 
 void APHMonsterBase::PostInitializeComponents()
 {

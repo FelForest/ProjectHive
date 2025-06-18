@@ -9,6 +9,9 @@
 /**
  * 
  */
+
+class USkeletalMesh;
+
 UCLASS()
 class PROJECTHIVE_API UPHCharacterSkeletalMeshData : public UPrimaryDataAsset
 {
@@ -16,14 +19,14 @@ class PROJECTHIVE_API UPHCharacterSkeletalMeshData : public UPrimaryDataAsset
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CharacterMesh)
-	TObjectPtr<class USkeletalMesh> HeadMesh;
+	TObjectPtr<USkeletalMesh> HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CharacterMesh)
-	TObjectPtr<class USkeletalMesh> BodyMesh;
+	TObjectPtr<USkeletalMesh> BodyMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CharacterMesh)
-	TObjectPtr<class USkeletalMesh> ArmMesh;
+	TObjectPtr<USkeletalMesh> ArmMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CharacterMesh)
-	TObjectPtr<class USkeletalMesh> LegMesh;
+	TObjectPtr<USkeletalMesh> LegMesh;
 };

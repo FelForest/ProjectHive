@@ -57,10 +57,10 @@ public:
 	UFUNCTION()
 	virtual void CallAlertTargetBegin(APawn* NewTarget) override;
 	UFUNCTION()
-	virtual void CallAlertDestinationBegin(FVector NewLocation) override;
+	virtual void CallAlertDestinationBegin(APawn* NewTarget) override;
 
 	UFUNCTION()
-	virtual void CallAlertTargetEnd(UAnimMontage* Montage, bool bInterrupted) override;
+	virtual void CallAlertTargetEnd() override;
 
 	UFUNCTION()
 	virtual void CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterrupted) override;
@@ -71,12 +71,14 @@ public:
 	UFUNCTION()
 	virtual void SetIsAlerting(bool InIsAlerting) override;
 
+	virtual void SetMonsterAlertDelegate(const FMonsterAlertFinished& InOnAlertFinished) override;
+
 	// 컨트롤러가 있다는것을 보장이 가능한 함수
 	virtual void PossessedBy(AController* NewController) override;
 
 	// Target 설정함수
 	UFUNCTION()
-	void SetTarget(APawn* NewTarget);
+	virtual void SetTarget(APawn* NewTarget);
 
 	UFUNCTION()
 	APawn* GetTarget() const;
@@ -85,13 +87,41 @@ public:
 	void SetDestination(FVector NewDestination);
 
 	UFUNCTION()
+	float GetAttackRange() const;
+
+	UFUNCTION()
 	FVector GetDestination() const;
+
+	UFUNCTION()
+	void SetIsCombat(bool NewIsCombat);
+
+	UFUNCTION()
+	bool GetIsCombat();
+
+	UFUNCTION()
+	void SetCanAlert(bool NewCanAlert);
+
+	UFUNCTION()
+	void ResetCanALert();
 
 	// 피격 받았을때 처리할 함수
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	// 체력이 없어 죽었을때 호출한 함수
+	UFUNCTION()
 	virtual void OnDead();
+
+	UFUNCTION()
+	bool GetIsDead() const;
+
+	UFUNCTION()
+	void FinializeDeath(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION(BlueprintCallable, Category = "Commander")
+	void SetCommander(class APHMonsterBase* NewCommander);
+
+	UFUNCTION()
+	APHMonsterBase* GetCommander();
 
 protected:
 	// 필요한 에셋 로드 함수
@@ -100,12 +130,19 @@ protected:
 	virtual void PostInitializeComponents() override;
 public:	
 
+	// 기본적으로 필요한 몬스터 몽타주 데이터 에셋
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Montage)
+	TObjectPtr<class UPHMonsterMontageAsset> MonsterMontages;
+
+	FMonsterAlertFinished OnAlertFinished;
+
 protected:
 	// 감지를 위한 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sens)
 	TObjectPtr<class UPHMonsterSensingComponent> SensingComponent;
 
 	// 스탯 컴포넌트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	TObjectPtr<class UPHMonsterStatComponent> StatComponent;
 
 	// 광폭화 비율? 흥분도
@@ -139,7 +176,11 @@ private:
 	UPROPERTY()
 	TScriptInterface<class IPHSensingAIInterface> SensingAI;
 
-	// 기본적으로 필요한 몬스터 몽타주 데이터 에셋
 	UPROPERTY()
-	TObjectPtr<class UPHMonsterMontageAsset> MonsterMontages;
+	TScriptInterface<class IPHMonsterAIInterface> MonsterAI;
+
+	UPROPERTY()
+	TObjectPtr<class APHMonsterBase> Commander;
+
+	FTimerHandle AlertTimer;
 };

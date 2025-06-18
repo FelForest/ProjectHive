@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI/PHHUDWidget.h"
@@ -8,7 +8,7 @@
 
 #include "Item/Equipment/Weapon/Gun/PHGun.h"
 
-// TODO : ¿Œ≈Õ∆‰¿ÃΩ∫∑Œ πŸ≤Ÿ±‚ « ø‰
+// TODO : Ïù∏ÌÑ∞ÌéòÏù¥Ïä§Î°ú Î∞îÍæ∏Í∏∞ ÌïÑÏöî
 #include "Character/PHPlayableCharacter.h"
 
 UPHHUDWidget::UPHHUDWidget(const FObjectInitializer& ObjectInitializer)
@@ -50,7 +50,7 @@ void UPHHUDWidget::StartUpdateHP()
 
 void UPHHUDWidget::UpdateGunUI(const FGunState& NewGunState)
 {
-	// πﬁæ∆ø¬ √—¿« µ•¿Ã≈Õ º≥¡§
+	// Î∞õÏïÑÏò® Ï¥ùÏùò Îç∞Ïù¥ÌÑ∞ ÏÑ§Ï†ï
 	UE_LOG(LogTemp, Log, TEXT("GunUIUpdate"));
 
 	AmmoString = FString::Printf(TEXT("%d / %d"), NewGunState.CurrentAmmo, NewGunState.MaxAmmo);
@@ -71,7 +71,7 @@ void UPHHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// HP º≥¡§
+	// HP ÏÑ§Ï†ï
 	FrontHPSlider = Cast<URadialSlider>(GetWidgetFromName(TEXT("FrontHPSlider")));
 
 	if (FrontHPSlider == nullptr)
@@ -86,7 +86,7 @@ void UPHHUDWidget::NativeConstruct()
 		UE_LOG(LogTemp, Log, TEXT("BackHPSlider is nullptr"));
 	}
 
-	// √— º≥¡§
+	// Ï¥ù ÏÑ§Ï†ï
 	AmmoText = Cast<UTextBlock>(GetWidgetFromName(TEXT("Ammo")));
 	
 	if (AmmoText == nullptr)

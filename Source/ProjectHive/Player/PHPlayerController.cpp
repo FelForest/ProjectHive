@@ -23,7 +23,6 @@ void APHPlayerController::OnPossess(APawn* aPawn)
 	{
 		PHHUDWidget->AddToViewport();
 	}
-
 }
 
 void APHPlayerController::ShowInteractUI(AActor* Target)

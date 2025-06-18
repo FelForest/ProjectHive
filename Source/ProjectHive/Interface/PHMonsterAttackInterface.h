@@ -19,6 +19,9 @@ class UPHMonsterAttackInterface : public UInterface
  * Description	:
  * 공격이 가능한 몬스터 인터페이스
  */
+
+DECLARE_DELEGATE(FCombatMonsterAttackFinished);
+
 class PROJECTHIVE_API IPHMonsterAttackInterface
 {
 	GENERATED_BODY()
@@ -26,4 +29,10 @@ class PROJECTHIVE_API IPHMonsterAttackInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void Attack() = 0;
+
+	virtual void SetCombatMonsterAttackdelegate(const FCombatMonsterAttackFinished& InOnAttackFinished) = 0;
+
+	virtual void NotifyAttackFinished(class UAnimMontage* Montage, bool bInterrupted) = 0;
+
+	virtual void DoAttack() = 0;
 };

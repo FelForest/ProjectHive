@@ -24,5 +24,5 @@ void UPHMonsterAlertNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 		return;
 	}
 
-	AlertCaller->CallAlertTarget();
+	AlertCaller->CallAlertDestination();
 }

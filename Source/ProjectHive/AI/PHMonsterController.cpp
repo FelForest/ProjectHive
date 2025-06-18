@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Monster/PHMonsterBase.h"
 
 APHMonsterController::APHMonsterController()
 {
@@ -19,6 +20,8 @@ APHMonsterController::APHMonsterController()
 	{
 		BTAsset = BTAssetRef.Object;
 	}
+
+	bIsInCombat = false;
 }
 
 void APHMonsterController::RunAI()
@@ -40,10 +43,35 @@ void APHMonsterController::StopAI()
 	}
 }
 
+void APHMonsterController::SetIsCombat(bool NewState)
+{
+	GetBlackboardComponent()->SetValueAsBool(TEXT("IsInCombat"), NewState);
+	bIsInCombat = NewState;
+}
+
+void APHMonsterController::SetInRange(bool NewInRange)
+{
+	GetBlackboardComponent()->SetValueAsBool(TEXT("IsInRange"), NewInRange);
+}
+
+float APHMonsterController::GetRange() const
+{
+	APHMonsterBase* Monster = Cast<APHMonsterBase>(GetPawn());
+	if (Monster)
+	{
+		return Monster->GetAttackRange();
+	}
+	return 0.0f;
+}
+
+void APHMonsterController::SetCanAlert(bool NewCanAlert)
+{
+	GetBlackboardComponent()->SetValueAsBool(TEXT("CanAlert"), NewCanAlert);
+}
+
 void APHMonsterController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
 	RunAI();
 }
 

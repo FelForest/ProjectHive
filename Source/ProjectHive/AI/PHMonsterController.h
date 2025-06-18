@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "Interface/PHSensingAIInterface.h"
+#include "AI/PHMonsterAIInterface.h"
 #include "PHMonsterController.generated.h"
 
 /**
@@ -12,15 +13,26 @@
  */
 UCLASS()
 class PROJECTHIVE_API APHMonsterController : public AAIController,
-	public IPHSensingAIInterface
+	public IPHSensingAIInterface,
+	public IPHMonsterAIInterface
+
 {
 	GENERATED_BODY()
 	
 public:
 	APHMonsterController();
 
-	void RunAI();
-	void StopAI();
+	virtual void RunAI() override;
+	virtual void StopAI() override;
+
+	// 전투중인지 아닌지는 몬스터가 판단해도 될거 같음
+	virtual void SetIsCombat(bool NewState) override;
+
+	virtual void SetInRange(bool NewInRange) override;
+
+	virtual float GetRange() const override;
+
+	virtual void SetCanAlert(bool NewCanAlert) override;
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
@@ -54,4 +66,7 @@ protected:
 
 	UPROPERTY()
 	FVector Destination;
+
+	UPROPERTY()
+	uint8 bIsInCombat : 1;
 };
