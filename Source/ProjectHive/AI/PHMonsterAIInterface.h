@@ -32,11 +32,5 @@ public:
 	virtual void SetIsCombat(bool NewState) = 0;
 
 	UFUNCTION()
-	virtual void SetInRange(bool NewInRange) = 0;
-
-	UFUNCTION()
-	virtual float GetRange() const = 0;
-
-	UFUNCTION()
-	virtual void SetCanAlert(bool NewCanAlert) = 0;
+	virtual bool GetIsCombat() const = 0;
 };

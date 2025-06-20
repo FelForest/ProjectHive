@@ -12,8 +12,6 @@ UPHMonsterStatComponent::UPHMonsterStatComponent()
 	Hp = 10.0f;
 
 	MoveSpeed = 600.0f;
-
-	AttackRange = 500.0f;
 }
 
 void UPHMonsterStatComponent::ChangeHP(float InDamage)

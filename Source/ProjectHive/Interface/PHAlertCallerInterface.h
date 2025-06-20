@@ -26,16 +26,10 @@ class PROJECTHIVE_API IPHAlertCallerInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(Category = "Alert")
-	virtual void CallAlertTarget() = 0;
-
-	UFUNCTION(Category = "Alert")
 	virtual void CallAlertDestination() = 0;
 
-	// 오버로드 하려면 리플리케이션 사용 못함 
-	virtual void CallAlertTargetBegin(APawn* NewTarget) = 0;
 	virtual void CallAlertDestinationBegin(APawn* NewTarget) = 0;
 
-	virtual void CallAlertTargetEnd() = 0;
 	virtual void CallAlertDestinationEnd(class UAnimMontage* Montage, bool bInterrupted) = 0;
 
 	virtual bool IsAlerting() = 0;

@@ -37,8 +37,7 @@
  */
 
 UCLASS()
-class PROJECTHIVE_API APHMonsterBase : public ACharacter,
-	public IPHAlertCallerInterface
+class PROJECTHIVE_API APHMonsterBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -47,31 +46,14 @@ public:
 	APHMonsterBase();
 
 	// 목표(플레이어 및 기타 등등)을 발견하면 주위에 알리는 함수
-	virtual void CallAlertTarget() override;
-
-	// 특정 위치에 가라고 알리는 함수
-	// 이것을 여기서 정의하는게 의미가 있는지 모르겠음 -> 여기는 어디까지나 추상 클래스임
-	virtual void CallAlertDestination() override;
+	virtual void CallAlertTarget();
 
 	// 몽타주 호출을 위한 함수
 	UFUNCTION()
-	virtual void CallAlertTargetBegin(APawn* NewTarget) override;
-	UFUNCTION()
-	virtual void CallAlertDestinationBegin(APawn* NewTarget) override;
+	virtual void CallAlertTargetBegin(APawn* NewTarget);
 
 	UFUNCTION()
-	virtual void CallAlertTargetEnd() override;
-
-	UFUNCTION()
-	virtual void CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterrupted) override;
-
-	UFUNCTION()
-	virtual bool IsAlerting() override;
-
-	UFUNCTION()
-	virtual void SetIsAlerting(bool InIsAlerting) override;
-
-	virtual void SetMonsterAlertDelegate(const FMonsterAlertFinished& InOnAlertFinished) override;
+	virtual void CallAlertTargetEnd();
 
 	// 컨트롤러가 있다는것을 보장이 가능한 함수
 	virtual void PossessedBy(AController* NewController) override;
@@ -84,25 +66,10 @@ public:
 	APawn* GetTarget() const;
 
 	UFUNCTION()
-	void SetDestination(FVector NewDestination);
-
-	UFUNCTION()
-	float GetAttackRange() const;
-
-	UFUNCTION()
-	FVector GetDestination() const;
-
-	UFUNCTION()
 	void SetIsCombat(bool NewIsCombat);
 
 	UFUNCTION()
-	bool GetIsCombat();
-
-	UFUNCTION()
-	void SetCanAlert(bool NewCanAlert);
-
-	UFUNCTION()
-	void ResetCanALert();
+	bool GetIsCombat() const;
 
 	// 피격 받았을때 처리할 함수
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -151,10 +118,6 @@ protected:
 	UPROPERTY()
 	float RageLevel;
 
-	// 이동 할 위치 -> 처음에는 Location 했는데 TargetLocation이라고 하니까 위의 Target의 위치인지 목표 위치인지 햇갈려셔 변경
-	UPROPERTY()
-	FVector Destination;
-
 	// 죽었는지 아닌지 확인용 변수
 	UPROPERTY()
 	uint8 bIsDead : 1;
@@ -170,7 +133,7 @@ protected:
 	uint8 bIsAlerting : 1;
 
 	UPROPERTY()
-	uint8 bIsInCombat : 1;
+	TObjectPtr<class APHMonsterBase> Commander;
 
 private:
 	UPROPERTY()
@@ -178,9 +141,6 @@ private:
 
 	UPROPERTY()
 	TScriptInterface<class IPHMonsterAIInterface> MonsterAI;
-
-	UPROPERTY()
-	TObjectPtr<class APHMonsterBase> Commander;
 
 	FTimerHandle AlertTimer;
 };

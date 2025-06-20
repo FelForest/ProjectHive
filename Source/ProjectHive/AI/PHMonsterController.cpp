@@ -49,24 +49,9 @@ void APHMonsterController::SetIsCombat(bool NewState)
 	bIsInCombat = NewState;
 }
 
-void APHMonsterController::SetInRange(bool NewInRange)
+bool APHMonsterController::GetIsCombat() const
 {
-	GetBlackboardComponent()->SetValueAsBool(TEXT("IsInRange"), NewInRange);
-}
-
-float APHMonsterController::GetRange() const
-{
-	APHMonsterBase* Monster = Cast<APHMonsterBase>(GetPawn());
-	if (Monster)
-	{
-		return Monster->GetAttackRange();
-	}
-	return 0.0f;
-}
-
-void APHMonsterController::SetCanAlert(bool NewCanAlert)
-{
-	GetBlackboardComponent()->SetValueAsBool(TEXT("CanAlert"), NewCanAlert);
+	return bIsInCombat;
 }
 
 void APHMonsterController::OnPossess(APawn* InPawn)
@@ -84,15 +69,4 @@ void APHMonsterController::SetTarget(APawn* NewPawn)
 APawn* APHMonsterController::GetTarget() const
 {
 	return Target;
-}
-
-void APHMonsterController::SetDestination(FVector NewDestination)
-{
-	GetBlackboardComponent()->SetValueAsVector(FName("Destination"), NewDestination);
-	Destination = NewDestination;
-}
-
-FVector APHMonsterController::GetDestination() const
-{
-	return Destination;
 }

@@ -28,11 +28,7 @@ public:
 	// 전투중인지 아닌지는 몬스터가 판단해도 될거 같음
 	virtual void SetIsCombat(bool NewState) override;
 
-	virtual void SetInRange(bool NewInRange) override;
-
-	virtual float GetRange() const override;
-
-	virtual void SetCanAlert(bool NewCanAlert) override;
+	virtual bool GetIsCombat() const override;
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
@@ -42,10 +38,6 @@ protected:
 	virtual void SetTarget(APawn* NewPawn) override;
 
 	virtual APawn* GetTarget() const override;
-
-	virtual void SetDestination(FVector NewDestination) override;
-
-	virtual FVector GetDestination() const override;
 
 protected:
 	// Blackboard 애셋

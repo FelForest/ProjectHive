@@ -8,8 +8,6 @@
 #include "AI/PHMonsterController.h"
 #include "Interface/PHSensingAIInterface.h"
 #include "AI/PHMonsterAIInterface.h"
-#include "Interface/PHCommandMonsterInterface.h"
-
 
 #include "Data/Monster/PHMonsterMontageAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -33,9 +31,6 @@ APHMonsterBase::APHMonsterBase()
 	{
 		MonsterMontages = MonsterMontagesRef.Object;
 	}
-
-	// 현재 전투중인지 확인하는 변수
-	bIsInCombat = false;
 
 	// 현재 죽었는지 아닌지 확인하는 변수
 	bIsDead = false;
@@ -104,23 +99,7 @@ void APHMonsterBase::CallAlertTarget()
 	);
 #endif
 
-
 	CallAlertTargetEnd();
-}
-
-void APHMonsterBase::CallAlertDestination()
-{
-	// TODO : Commender있으면 알려주기
-	UE_LOG(LogTemp, Log, TEXT("CallAlertDestination"));
-	UE_LOG(LogTemp, Log, TEXT("NewDestination : %f , %f"), Destination.X, Destination.Y);
-	if (Commander != nullptr && !Commander->GetIsDead())
-	{
-		IPHCommandMonsterInterface* InCommander = Cast<IPHCommandMonsterInterface>(Commander);
-		if (InCommander != nullptr)
-		{
-			InCommander->SetNewDestination(Destination);
-		}
-	}
 }
 
 void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
@@ -162,77 +141,12 @@ void APHMonsterBase::CallAlertTargetBegin(APawn* NewTarget)
 	}
 }
 
-void APHMonsterBase::CallAlertDestinationBegin(APawn* NewTarget)
-{
-	FVector NewDestination;
-	if (NewTarget == nullptr)
-	{
-		NewDestination = GetActorLocation();
-	}
-	else
-	{
-		NewDestination = NewTarget->GetActorLocation();
-	}
-
-	SetDestination(NewDestination);
-
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &APHMonsterBase::CallAlertDestinationEnd);
-	AnimInstance->Montage_Play(MonsterMontages->BeginAlertMontage, 1.0f);
-
-	AnimInstance->Montage_SetEndDelegate(EndDelegate, MonsterMontages->BeginAlertMontage);
-	bIsAlerting = true;
-	UE_LOG(LogTemp, Log, TEXT("CallAlertDestinationBegin"));
-}
-
 void APHMonsterBase::CallAlertTargetEnd()
 {
 	UE_LOG(LogTemp, Log, TEXT("CallAlertTargetEnd"));
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
 	SensingComponent->SetActive(false);
-}
-
-void APHMonsterBase::CallAlertDestinationEnd(UAnimMontage* Montage, bool bInterrupted)
-{
-	UE_LOG(LogTemp, Log, TEXT("CallAlertDestinationEnd"));
-	FTimerHandle AlertTimerHandle;
-
-	GetWorldTimerManager().SetTimer(
-		AlertTimerHandle,
-		FTimerDelegate::CreateLambda([this]()
-			{
-				if (!AnimInstance->Montage_IsPlaying(MonsterMontages->EndAlertMontage))
-				{
-					AnimInstance->Montage_Play(MonsterMontages->EndAlertMontage, -1.0f);
-					SetIsAlerting(false);
-					SetIsCombat(true);
-					GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-					SetCanAlert(false);
-
-					OnAlertFinished.ExecuteIfBound();
-				}
-			}),
-		AlertTime,
-		false
-	);
-}
-
-bool APHMonsterBase::IsAlerting()
-{
-	return bIsAlerting;
-}
-
-void APHMonsterBase::SetIsAlerting(bool InIsAlerting)
-{
-	bIsAlerting = InIsAlerting;
-}
-
-void APHMonsterBase::SetMonsterAlertDelegate(const FMonsterAlertFinished& InOnAlertFinished)
-{
-	OnAlertFinished = InOnAlertFinished;
 }
 
 void APHMonsterBase::PossessedBy(AController* NewController)
@@ -276,67 +190,14 @@ APawn* APHMonsterBase::GetTarget() const
 	return SensingAI->GetTarget();
 }
 
-void APHMonsterBase::SetDestination(FVector NewDestination)
-{
-	if (SensingAI == nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("SensingAI is nullptr"));
-		return;
-	}
-	SensingAI->SetDestination(NewDestination);
-	Destination = NewDestination;
-}
-
-float APHMonsterBase::GetAttackRange() const
-{
-	return StatComponent->GetAttackRange();
-}
-
-FVector APHMonsterBase::GetDestination() const
-{
-	if (SensingAI == nullptr)
-	{
-		UE_LOG(LogTemp, Log, TEXT("SensingAI is nullptr"));
-		return FVector();
-	}
-	return SensingAI->GetDestination();
-}
-
 void APHMonsterBase::SetIsCombat(bool NewIsCombat)
 {
 	MonsterAI->SetIsCombat(NewIsCombat);
-	bIsInCombat = NewIsCombat;
 }
 
-bool APHMonsterBase::GetIsCombat()
+bool APHMonsterBase::GetIsCombat() const
 {
-	return bIsInCombat;
-}
-
-void APHMonsterBase::SetCanAlert(bool NewCanAlert)
-{
-	if (MonsterAI == nullptr)
-	{
-		return;
-	}
-
-	MonsterAI->SetCanAlert(NewCanAlert);
-
-	if (!NewCanAlert && Commander != nullptr && !Commander->GetIsCombat())
-	{
-		GetWorldTimerManager().ClearTimer(AlertTimer);
-		GetWorldTimerManager().SetTimer(
-			AlertTimer,
-			this,
-			&APHMonsterBase::ResetCanALert,
-			5.0f,
-			false);
-	}
-}
-
-void APHMonsterBase::ResetCanALert()
-{
-	MonsterAI->SetCanAlert(true);
+	return MonsterAI->GetIsCombat();
 }
 
 float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -358,7 +219,7 @@ float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 	//SensingComponent->Scane
 	
 	// 현재 전투중으로 변경
-	bIsInCombat = true;
+	SetIsCombat(true);
 
 	StatComponent->ChangeHP(Damage);
 
