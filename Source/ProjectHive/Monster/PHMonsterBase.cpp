@@ -260,6 +260,7 @@ void APHMonsterBase::SetTarget(APawn* NewTarget)
 	if (SensingAI == nullptr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SensingAI is nullptr"));
+		return;
 	}
 
 	SetIsCombat((NewTarget != nullptr));
@@ -304,8 +305,11 @@ FVector APHMonsterBase::GetDestination() const
 
 void APHMonsterBase::SetIsCombat(bool NewIsCombat)
 {
-	MonsterAI->SetIsCombat(NewIsCombat);
-	bIsInCombat = NewIsCombat;
+	if (MonsterAI)
+	{
+		MonsterAI->SetIsCombat(NewIsCombat);
+		bIsInCombat = NewIsCombat;
+	}
 }
 
 bool APHMonsterBase::GetIsCombat()
