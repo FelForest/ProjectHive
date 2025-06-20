@@ -14,11 +14,11 @@ APHCombatMonsterBase::APHCombatMonsterBase()
 
 void APHCombatMonsterBase::Attack()
 {
-	/*UPHMonsterAttackComponent* AttackComponent = SelectAttackComponent();
+	UPHMonsterAttackComponent* AttackComponent = SelectAttackComponent();
 	if (AttackComponent != nullptr)
 	{
 		AttackComponent->Attack();
-	}*/
+	}
 
 	if (AnimInstance->Montage_IsPlaying(MonsterMontages->AttackMontage))
 	{

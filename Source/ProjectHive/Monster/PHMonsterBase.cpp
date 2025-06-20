@@ -17,6 +17,7 @@
 // Sets default values
 APHMonsterBase::APHMonsterBase()
 {
+	TakeCount = 0;
 	// 감지 설정
 	SensingComponent = CreateDefaultSubobject<UPHMonsterSensingComponent>(TEXT("SensingComponent"));
 
@@ -365,6 +366,10 @@ float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 	bIsInCombat = true;
 
 	StatComponent->ChangeHP(Damage);
+
+	TakeCount += 1;
+
+	UE_LOG(LogTemp, Warning, TEXT("%d"), TakeCount);
 
 	return 0.0f;
 }

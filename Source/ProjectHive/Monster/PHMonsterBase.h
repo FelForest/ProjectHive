@@ -36,6 +36,8 @@
  * Attackable Interface를 만들어야 하나
  */
 
+static int32 TakeCount;
+
 UCLASS()
 class PROJECTHIVE_API APHMonsterBase : public ACharacter,
 	public IPHAlertCallerInterface

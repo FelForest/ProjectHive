@@ -690,7 +690,10 @@ void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
 		return;
 	}
 
-	AnimInstance->Montage_Play(WeaponComponent->GetThrowMontage());
+	if (!AnimInstance->Montage_IsPlaying(WeaponComponent->GetThrowMontage()))
+	{
+		AnimInstance->Montage_Play(WeaponComponent->GetThrowMontage());
+	}
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)

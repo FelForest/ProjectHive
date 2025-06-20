@@ -83,7 +83,7 @@ void APHGrenade::Explode()
 	
 	UE_LOG(LogTemp, Log, TEXT("Explision"));
 
-	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), /*CONSIDER : 무시해야 하는 액터들->최적화를 위한것, 벽 뒤에 있는 것들 이런건 고민 해봐야함*/ TArray<AActor*>(), this, GetInstigatorController(), true, ECC_Visibility);
+	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), /*CONSIDER : 무시해야 하는 액터들->최적화를 위한것, 벽 뒤에 있는 것들 이런건 고민 해봐야함*/ TArray<AActor*>(), this, GetInstigatorController(), true, ECC_GameTraceChannel6);
 
 	// 수류탄 제거 -> 이펙트 끝나고 삭제되어야함
 	SetLifeSpan(/*TODO : 이펙트 시간 받아와야함*/ 1.0f);

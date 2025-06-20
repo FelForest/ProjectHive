@@ -24,5 +24,4 @@ APHMonsterCommandController::APHMonsterCommandController()
 void APHMonsterCommandController::SetIsOnAlert(bool InIsOnAlert)
 {
 	GetBlackboardComponent()->SetValueAsBool(TEXT("IsOnAlert"), InIsOnAlert);
-	UE_LOG(LogTemp, Warning, TEXT("SetIsOnAlert"));
 }

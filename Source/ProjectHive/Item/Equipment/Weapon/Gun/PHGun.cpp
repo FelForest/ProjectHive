@@ -85,7 +85,6 @@ void APHGun::Reload()
 	UE_LOG(LogTemp, Log, TEXT("Reload"));
 	CurrentMagazine -= 1;
 	CurrentAmmo = MaxAmmo;
-	// 캐릭터에서 실행하는거여서 모르겠다
 	OnGunUpdate.Broadcast(GetGunState());
 }
 
