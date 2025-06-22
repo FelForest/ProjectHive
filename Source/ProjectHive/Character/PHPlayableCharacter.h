@@ -150,6 +150,11 @@ protected:
 
 	void ThrowGrenade(const FInputActionValue& Value);
 
+	void UpdateGrenadeAimDirection(const FInputActionValue& Value);
+
+	void BeginGrenadeAimDirection(const FInputActionValue& Value);
+
+
 	void SetMappingContext();
 	
 	// 입력시 마우스 위치 업데이트
@@ -179,6 +184,10 @@ protected:
 	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지를 위한 함수
 	UFUNCTION()
 	void OnDeferredWeaponEquipped();
+
+	UFUNCTION()
+	void UpdateCharacterRotator(float DeltaTime);
+
 
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
@@ -306,4 +315,7 @@ protected:
 
 	UPROPERTY()
 	int32 SwapDirection;
+
+	UPROPERTY()
+	uint8 bIsGrenadeAiming : 1;
 };

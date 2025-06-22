@@ -35,8 +35,8 @@ void UPHGrenadeComponent::ThrowGrenade(USkeletalMeshComponent* InMesh, FVector I
 
 void UPHGrenadeComponent::SetGrenadeData(USkeletalMeshComponent* InMesh, FVector InTargetLocation)
 {
-	InitSpeed = 1000.0f;
-	MaxSpeed = 5000.0f;
+	InitSpeed = 5000;
+	MaxSpeed = 10000.0f;
 
 	
 
@@ -87,7 +87,7 @@ void UPHGrenadeComponent::ApplyGrenadeData()
 
 	// UGameplayStatics::SuggestProjectileVelocity
 	// 이것도 있는데 왜 안먹는지 모르겠음
-	bool bSuccess = UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, TossVelocity, SpawnLocation, TargetLocation);
+	bool bSuccess = UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, TossVelocity, SpawnLocation, TargetLocation, 0.0f, 0.1f);
 
 	if (bSuccess)
 	{

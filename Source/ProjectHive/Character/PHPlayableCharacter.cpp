@@ -114,6 +114,8 @@ APHPlayableCharacter::APHPlayableCharacter()
 	// TODO : 발사 속도 조절을 위해서 어쩌구 저쩌구 Test
 	FireRate = 1.0f;
 	bIsAttacking = false;
+
+	bIsGrenadeAiming = false;
 }
 
 bool APHPlayableCharacter::IsAiming() const
@@ -214,6 +216,10 @@ void APHPlayableCharacter::Tick(float DeltaTime)
 	TensionDecreaseTimeline.TickTimeline(DeltaTime);
 	TensionIncreaseTimeline.TickTimeline(DeltaTime);
 	SettingRotationTimeline.TickTimeline(DeltaTime);
+	if (bIsGrenadeAiming || bIsAiming)
+	{
+		UpdateCharacterRotator(DeltaTime);
+	}
 }
 
 void APHPlayableCharacter::InitializeTimeLine()
@@ -251,6 +257,8 @@ void APHPlayableCharacter::InitializeActionMappings()
 	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
 	ActionMapping.Add(ECharacterActionType::Reload, &APHPlayableCharacter::Reload);
 	ActionMapping.Add(ECharacterActionType::ThrowGrenade, &APHPlayableCharacter::ThrowGrenade);
+	ActionMapping.Add(ECharacterActionType::AimGrenade, &APHPlayableCharacter::UpdateGrenadeAimDirection);
+	ActionMapping.Add(ECharacterActionType::AimGrenadeStart, &APHPlayableCharacter::BeginGrenadeAimDirection);
 	
 }
 
@@ -319,6 +327,8 @@ void APHPlayableCharacter::ThrowGrenade()
 		UE_LOG(LogTemp, Log, TEXT("Not Update MouseLocation"));
 	}
 	GrenadeComponent->ThrowGrenade(GetMesh(), MouseLocation);
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bIsGrenadeAiming = false;
 }
 
 float APHPlayableCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -556,18 +566,18 @@ void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
 	/*SettingRotationTimeline.SetLooping(false);
 	SettingRotationTimeline.PlayFromStart();*/
 	// 마우스 위치 받아오기
-	if (UpdateMouseLocation())
-	{
-		// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
-		const FVector ToMouse = MouseLocation - GetActorLocation();
+	//if (UpdateMouseLocation())
+	//{
+	//	// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+	//	const FVector ToMouse = MouseLocation - GetActorLocation();
 
-		if (!ToMouse.IsNearlyZero())
-		{
-			FRotator CurrentRotation = GetActorRotation();
-			const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
-			SetActorRotation(NewRotation);	
-		}
-	}
+	//	if (!ToMouse.IsNearlyZero())
+	//	{
+	//		FRotator CurrentRotation = GetActorRotation();
+	//		const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
+	//		SetActorRotation(NewRotation);	
+	//	}
+	//}
 }
 
 void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
@@ -696,6 +706,30 @@ void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
 	}
 }
 
+void APHPlayableCharacter::UpdateGrenadeAimDirection(const FInputActionValue& Value)
+{
+
+}
+
+void APHPlayableCharacter::BeginGrenadeAimDirection(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	bIsGrenadeAiming = true;
+	//if (UpdateMouseLocation())
+	//{
+	//	// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+	//	const FVector ToMouse = MouseLocation - GetActorLocation();
+
+	//	if (!ToMouse.IsNearlyZero())
+	//	{
+	//		FRotator CurrentRotation = GetActorRotation();
+	//		float NewYaw = FMath::Lerp(CurrentRotation.Yaw, ToMouse.Rotation().Yaw, 0.0f);
+	//		const FRotator TargetRotation = FRotator(CurrentRotation.Pitch, NewYaw, CurrentRotation.Roll);
+	//		SetActorRotation(TargetRotation);
+	//	}
+	//}
+}
+
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
 {
 	// Item은 타입을 가지고 있어서 그것으로 분기
@@ -752,6 +786,27 @@ void APHPlayableCharacter::OnDeferredWeaponEquipped()
 		return;
 	}
 	GetMesh()->SetAnimClass(WeaponComponent->GetWeapon()->GetWeaponAnimClass());
+}
+
+void APHPlayableCharacter::UpdateCharacterRotator(float DeltaTime)
+{
+	if (UpdateMouseLocation())
+	{
+		// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+		const FVector ToMouse = MouseLocation - GetActorLocation();
+
+		if (!ToMouse.IsNearlyZero())
+		{
+			FRotator CurrentRotation = GetActorRotation();
+			const FRotator TargetRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
+			const FRotator NewRot = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 10.0f);
+			SetActorRotation(NewRot);
+			if (CurrentRotation.Equals(TargetRotation, 1.0f))
+			{
+				bIsGrenadeAiming = false;
+			}
+		}
+	}
 }
 
 void APHPlayableCharacter::OnWeaponEquipped()
