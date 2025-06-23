@@ -22,4 +22,8 @@ class PROJECTHIVE_API IPHScoutInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
+	// 상위 객체에 알리는 함수
+	UFUNCTION()
+	virtual void ReportTargetLocationToCommander(FVector NewDestination) = 0;
 };

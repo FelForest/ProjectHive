@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Item/Consumable/PHGrenade.h"
@@ -9,23 +9,23 @@
 
 APHGrenade::APHGrenade()
 {
-	// Äİ¸®Àü »ı¼º
+	// ì½œë¦¬ì „ ìƒì„±
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
 
-	// ·çÆ® ¼³Á¤
+	// ë£¨íŠ¸ ì„¤ì •
 	SetRootComponent(CollisionComponent);
 	//CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	//CollisionComponent->SetSimulatePhysics(false);
 	CollisionComponent->SetCollisionProfileName(TEXT("Grenade"));
 	CollisionComponent->SetNotifyRigidBodyCollision(true);
 	
-	// ¸Ş½Ã »ı¼º
+	// ë©”ì‹œ ìƒì„±
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 
-	// ·çÆ®¿¡ ºÙ¿©ÁÖ±â
+	// ë£¨íŠ¸ì— ë¶™ì—¬ì£¼ê¸°
 	StaticMeshComponent->SetupAttachment(CollisionComponent);
 
-	// ¸Ş½Ã ³»¿ë¹° Ã¤¿ì±â
+	// ë©”ì‹œ ë‚´ìš©ë¬¼ ì±„ìš°ê¸°
 	// Load GrenadeMesh
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> StaticMesh(TEXT("/Game/ModularSciFiHeroesPolyart/Mesh/ModularParts/Int_Grenade_SM.Int_Grenade_SM"));
 	if (StaticMesh.Object)
@@ -33,11 +33,14 @@ APHGrenade::APHGrenade()
 		StaticMeshComponent->SetStaticMesh(StaticMesh.Object);
 	}
 
-	// Åõ»çÃ¼ ¹«ºê¸ÕÆ® »ı¼º
+	// íˆ¬ì‚¬ì²´ ë¬´ë¸Œë¨¼íŠ¸ ìƒì„±
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 
 	ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
 	ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
+
+	// ë°”ë‹¥ì— ë–¨ì–´ì§€ê³  ë‚˜ì„œ ìˆ˜ë¥˜íƒ„ í„°ì¹˜ëŠ”ë° ê±¸ë¦¬ëŠ” ì‹œê°„
+	DelayTime = 0.5f;
 }
 
 UProjectileMovementComponent* APHGrenade::GetProjectileMovement()
@@ -49,7 +52,7 @@ void APHGrenade::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	// Onhit µ¨¸®°ÔÀÌÆ®¿¡ ÇÔ¼ö ¹ÙÀÎµù
+	// Onhit ë¸ë¦¬ê²Œì´íŠ¸ì— í•¨ìˆ˜ ë°”ì¸ë”©
 	CollisionComponent->OnComponentHit.AddDynamic(this, &APHGrenade::OnGrenadeHit);
 }
 
@@ -57,7 +60,7 @@ void APHGrenade::PostInitializeComponents()
 
 void APHGrenade::OnGrenadeHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// ÀÚ±â ÀÚ½Å°ú ¼ÒÀ¯ÁÖ°¡ ¿À¹ö·¦ µÇ´Â°ÍÀ» ¸·À½ 
+	// ìê¸° ìì‹ ê³¼ ì†Œìœ ì£¼ê°€ ì˜¤ë²„ë© ë˜ëŠ”ê²ƒì„ ë§‰ìŒ 
 	if (OtherActor == this || OtherActor == GetOwner())
 	{
 		return;
@@ -65,28 +68,30 @@ void APHGrenade::OnGrenadeHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 	UE_LOG(LogTemp, Log, TEXT("Hit"));
 	UE_LOG(LogTemp, Log, TEXT("%s"), *OtherActor->GetName());
 
-	// ºÙÀÌÄ¡¸é ¹Ù·Î Æø¹ß ÇÔ¼ö È£Ãâ
-	Explode();
+	// ë¶™ì´ì¹˜ë©´ ë°”ë¡œ í­ë°œ í•¨ìˆ˜ í˜¸ì¶œ
+	GetWorldTimerManager().SetTimer(ExplodeTimerHandle, this, &APHGrenade::Explode, DelayTime, false);
 
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1.0f);
+	
 }
 
 void APHGrenade::Explode()
 {
-	// TODO : ÇöÀç´Â ¼ö·ùÅº Á¾·ù°¡ ÇÏ³ª¸¸ ÀÖ¾î¼­ ¿©±â¼­ »ı¼º, ÃßÈÄ Á¾·ù°¡ ´Ù¾çÇØÁö¸é Æø¹ß¾×ÅÍ µû·Î ¸¸µé¾î¾ßÇÔ
+	// TODO : í˜„ì¬ëŠ” ìˆ˜ë¥˜íƒ„ ì¢…ë¥˜ê°€ í•˜ë‚˜ë§Œ ìˆì–´ì„œ ì—¬ê¸°ì„œ ìƒì„±, ì¶”í›„ ì¢…ë¥˜ê°€ ë‹¤ì–‘í•´ì§€ë©´ í­ë°œì•¡í„° ë”°ë¡œ ë§Œë“¤ì–´ì•¼í•¨
 
-	// TODO : Æø¹ß ÀÌÆÑÆ® Àç»ı
+	// TODO : í­ë°œ ì´íŒ©íŠ¸ ì¬ìƒ
 	
-	// TODO : Æø¹ß »ç¿îµå Àç»ı
+	// TODO : í­ë°œ ì‚¬ìš´ë“œ ì¬ìƒ
 	
-	// µ¥¹ÌÁö ÁÖ´Â ÇÔ¼ö -> ¿À¹ö·¦ »ı¼º
+	// ë°ë¯¸ì§€ ì£¼ëŠ” í•¨ìˆ˜ -> ì˜¤ë²„ë© ìƒì„±
 	
 	UE_LOG(LogTemp, Log, TEXT("Explision"));
 
-	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), /*CONSIDER : ¹«½ÃÇØ¾ß ÇÏ´Â ¾×ÅÍµé->ÃÖÀûÈ­¸¦ À§ÇÑ°Í, º® µÚ¿¡ ÀÖ´Â °Íµé ÀÌ·±°Ç °í¹Î ÇØºÁ¾ßÇÔ*/ TArray<AActor*>(), this, GetInstigatorController(), true, ECC_GameTraceChannel6);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1.0f);
 
-	// ¼ö·ùÅº Á¦°Å -> ÀÌÆåÆ® ³¡³ª°í »èÁ¦µÇ¾î¾ßÇÔ
-	SetLifeSpan(/*TODO : ÀÌÆåÆ® ½Ã°£ ¹Ş¾Æ¿Í¾ßÇÔ*/ 1.0f);
+	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), /*CONSIDER : ë¬´ì‹œí•´ì•¼ í•˜ëŠ” ì•¡í„°ë“¤->ìµœì í™”ë¥¼ ìœ„í•œê²ƒ, ë²½ ë’¤ì— ìˆëŠ” ê²ƒë“¤ ì´ëŸ°ê±´ ê³ ë¯¼ í•´ë´ì•¼í•¨*/ TArray<AActor*>(), this, GetInstigatorController(), true, ECC_GameTraceChannel6);
+
+	// ìˆ˜ë¥˜íƒ„ ì œê±° -> ì´í™íŠ¸ ëë‚˜ê³  ì‚­ì œë˜ì–´ì•¼í•¨
+	SetLifeSpan(/*TODO : ì´í™íŠ¸ ì‹œê°„ ë°›ì•„ì™€ì•¼í•¨*/ 1.0f);
 }
 
 void APHGrenade::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -94,4 +99,9 @@ void APHGrenade::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	UE_LOG(LogTemp, Log, TEXT("Grenade is Destroyed"));
+}
+
+USphereComponent* APHGrenade::GetCollisionComponent()
+{
+	return CollisionComponent;
 }

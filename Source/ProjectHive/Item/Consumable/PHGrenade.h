@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,15 +7,15 @@
 #include "PHGrenade.generated.h"
 
 /**
- * Author		: ÀÓµ¿Çö
+ * Author		: ì„ë™í˜„
  * Date			: 2025-06-09
  * Description	:
- * ¼ö·ùÅº ¾×ÅÍ
- * ¿ø·¡´Â ¾ÆÀÌÅÛÀÌ ¸ÂÁö¸¸ »ç¿ëÇÏÁöµµ ¾Ê´Â ±â´ÉÀ» °¡Áö°í ÀÖÀ» ÇÊ¿ä°¡ ¾ø´Ù°í ÆÇ´Ü
- * CONSIDER : È¹µæ¿ë ¼ö·ùÅº, ´øÁö´Â ¿ëµµ ¼ö·ùÅº µû·Î ¸¸µå´Â°Ô ¸Â´Âµí
- * Äİ¸®Àü¿¡ ºÎµúÈ÷¸é Æø¹ß ¹× ¹üÀ§ µ¥¹ÌÁö ¹ß»ı
- * ApplyRadialDamage()¸¦ »ç¿ëÇÏ¿© ±¸ ÇüÅÂ ¹üÀ§ ÆÇÁ¤ Ã³¸®
- * Æø¹ß½Ã ÀÌÆåÆ® + »ç¿îµå + Ä«¸Ş¶ó Èçµé¸² ¹ß»ı ¿¹Á¤
+ * ìˆ˜ë¥˜íƒ„ ì•¡í„°
+ * ì›ë˜ëŠ” ì•„ì´í…œì´ ë§ì§€ë§Œ ì‚¬ìš©í•˜ì§€ë„ ì•ŠëŠ” ê¸°ëŠ¥ì„ ê°€ì§€ê³  ìˆì„ í•„ìš”ê°€ ì—†ë‹¤ê³  íŒë‹¨
+ * CONSIDER : íšë“ìš© ìˆ˜ë¥˜íƒ„, ë˜ì§€ëŠ” ìš©ë„ ìˆ˜ë¥˜íƒ„ ë”°ë¡œ ë§Œë“œëŠ”ê²Œ ë§ëŠ”ë“¯
+ * ì½œë¦¬ì „ì— ë¶€ë”ªíˆë©´ í­ë°œ ë° ë²”ìœ„ ë°ë¯¸ì§€ ë°œìƒ
+ * ApplyRadialDamage()ë¥¼ ì‚¬ìš©í•˜ì—¬ êµ¬ í˜•íƒœ ë²”ìœ„ íŒì • ì²˜ë¦¬
+ * í­ë°œì‹œ ì´í™íŠ¸ + ì‚¬ìš´ë“œ + ì¹´ë©”ë¼ í”ë“¤ë¦¼ ë°œìƒ ì˜ˆì •
  */
 
 class UProjectileMovementComponent;
@@ -28,26 +28,26 @@ class PROJECTHIVE_API APHGrenade : public AActor
 public:
 	APHGrenade();
 
-	// ¿ÜºÎ¿¡¼­ ¼¼ÆÃÀ» À§ÇÑ Getter
+	// ì™¸ë¶€ì—ì„œ ì„¸íŒ…ì„ ìœ„í•œ Getter
 	UProjectileMovementComponent* GetProjectileMovement();
 
-	// Æø¹ß ÇÔ¼ö
+	// í­ë°œ í•¨ìˆ˜
 
-	// µ¥¹ÌÁö Setter
+	// ë°ë¯¸ì§€ Setter
 	FORCEINLINE void SetExplosionDamage(float InDamage)
 	{
-		// CONSIDER : À½¼ö°ª ¹æÁö ¹æ¾È -> ÀÌ°Å È¸º¹ ¼ö·ùÅº °°Àº°Å °í¹ÎÇØº¼¼ö ÀÖ°Ú´Ù
+		// CONSIDER : ìŒìˆ˜ê°’ ë°©ì§€ ë°©ì•ˆ -> ì´ê±° íšŒë³µ ìˆ˜ë¥˜íƒ„ ê°™ì€ê±° ê³ ë¯¼í•´ë³¼ìˆ˜ ìˆê² ë‹¤
 		ExplosionDamage = FMath::Max(0.0f, InDamage);
 	};
 
-	// ¹İ°æ Setter
+	// ë°˜ê²½ Setter
 	FORCEINLINE void SetExplosionRadius(float InRadius)
 	{
-		// À½¼ö ¹æÁö
+		// ìŒìˆ˜ ë°©ì§€
 		ExplosionRadius = FMath::Max(0.0f, InRadius);
 	}
 
-	// ¿À¹ö·¦ ¹ÙÀÎµù ÇÏ±â À§ÇØ¼­ ¾ÈÀü¼ºÀÌ º¸ÀåµÇ´Â ½ÃÁ¡¿¡¼­ ÇÏ±â À§ÇÑ ÇÔ¼ö
+	// ì˜¤ë²„ë© ë°”ì¸ë”© í•˜ê¸° ìœ„í•´ì„œ ì•ˆì „ì„±ì´ ë³´ì¥ë˜ëŠ” ì‹œì ì—ì„œ í•˜ê¸° ìœ„í•œ í•¨ìˆ˜
 	virtual void PostInitializeComponents() override;
 
 	UFUNCTION()
@@ -57,34 +57,41 @@ public:
 		FVector NormalImpulse,
 		const FHitResult& Hit);
 
-	// Æø¹ß ÀÌÆåÆ® »ı¼º¹× »ç¿îµå, ¿À¹ö·¦ ÇÏ³ª ¸¸µé¾î¼­ µ¥¹ÌÁö ÁÖ´Â ÇÔ¼ö
+	// í­ë°œ ì´í™íŠ¸ ìƒì„±ë° ì‚¬ìš´ë“œ, ì˜¤ë²„ë© í•˜ë‚˜ ë§Œë“¤ì–´ì„œ ë°ë¯¸ì§€ ì£¼ëŠ” í•¨ìˆ˜
 	void Explode();
 
-	// Á¤È®ÇÏ°Ô »èÁ¦µÇ´ÂÁö È®ÀÎÇÏ±â À§ÇÑ ÇÔ¼ö
+	// ì •í™•í•˜ê²Œ ì‚­ì œë˜ëŠ”ì§€ í™•ì¸í•˜ê¸° ìœ„í•œ í•¨ìˆ˜
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	class USphereComponent* GetCollisionComponent();
+
 protected:
-	// Ãæµ¹ Ã³¸® ÇØ¾ßÇÏ´Â Äİ¸®Àü ÄÄÆ÷³ÍÆ®
+	// ì¶©ëŒ ì²˜ë¦¬ í•´ì•¼í•˜ëŠ” ì½œë¦¬ì „ ì»´í¬ë„ŒíŠ¸
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Explosion)
 	TObjectPtr<class USphereComponent> CollisionComponent;
 
-	// º¸¿©ÁÖ¾î¾ß ÇÏ´Â ¸Å½Ã ÄÄÆ÷³ÍÆ®
+	// ë³´ì—¬ì£¼ì–´ì•¼ í•˜ëŠ” ë§¤ì‹œ ì»´í¬ë„ŒíŠ¸
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 	TObjectPtr<class UStaticMeshComponent> StaticMeshComponent;
 
-	// Åõ»çÃ¼ÀÌ±â ¶§¹®¿¡ Åõ»çÃ¼ ¹«ºê¸ÕÆ® ÄÄÆ÷³ÍÆ®
+	// íˆ¬ì‚¬ì²´ì´ê¸° ë•Œë¬¸ì— íˆ¬ì‚¬ì²´ ë¬´ë¸Œë¨¼íŠ¸ ì»´í¬ë„ŒíŠ¸
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
 
-	// ÄÄÆ÷³ÍÆ®¿¡¼­ ¼³Á¤ÇØÁÙ µ¥ÀÌÅÍ
+	// ì»´í¬ë„ŒíŠ¸ì—ì„œ ì„¤ì •í•´ì¤„ ë°ì´í„°
 
-	// µ¥¹ÌÁö
+	// ë°ë¯¸ì§€
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Explosion")
 	float ExplosionDamage;
 
-	// ¹İ°æ
+	// ë°˜ê²½
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Explosion")
 	float ExplosionRadius;
 
+	UPROPERTY()
+	FTimerHandle ExplodeTimerHandle;
+
+	UPROPERTY()
+	float DelayTime;
 	
 };

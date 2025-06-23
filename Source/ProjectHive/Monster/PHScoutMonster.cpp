@@ -3,3 +3,10 @@
 
 #include "Monster/PHScoutMonster.h"
 
+APHScoutMonster::APHScoutMonster()
+{
+}
+
+void APHScoutMonster::ReportTargetLocationToCommander(FVector NewDestination)
+{
+}

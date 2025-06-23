@@ -11,6 +11,7 @@
 /**
  * 
  */
+
 UCLASS()
 class PROJECTHIVE_API APHWeapon : public APHEquipment,
 	public IPHAttackInterface

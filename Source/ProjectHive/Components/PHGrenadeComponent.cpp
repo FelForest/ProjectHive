@@ -4,7 +4,7 @@
 #include "Components/PHGrenadeComponent.h"
 #include "Item/Consumable/PHGrenade.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -35,7 +35,7 @@ void UPHGrenadeComponent::ThrowGrenade(USkeletalMeshComponent* InMesh, FVector I
 
 void UPHGrenadeComponent::SetGrenadeData(USkeletalMeshComponent* InMesh, FVector InTargetLocation)
 {
-	InitSpeed = 5000;
+	InitSpeed = 3000;
 	MaxSpeed = 10000.0f;
 
 	
@@ -85,9 +85,17 @@ void UPHGrenadeComponent::ApplyGrenadeData()
 	// 거리에 따른 속도값;
 	FVector TossVelocity;
 
-	// UGameplayStatics::SuggestProjectileVelocity
-	// 이것도 있는데 왜 안먹는지 모르겠음
-	bool bSuccess = UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, TossVelocity, SpawnLocation, TargetLocation, 0.0f, 0.1f);
+	bool bSuccess = UGameplayStatics::SuggestProjectileVelocity(
+		this,
+		TossVelocity,
+		SpawnLocation,
+		TargetLocation,
+		InitSpeed,              
+		false,                     
+		CurrentGrenade->GetCollisionComponent()->GetScaledSphereRadius(),
+		0.0f,
+		ESuggestProjVelocityTraceOption::DoNotTrace
+	);
 
 	if (bSuccess)
 	{

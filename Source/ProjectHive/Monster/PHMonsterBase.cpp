@@ -291,7 +291,9 @@ void APHMonsterBase::SetDestination(FVector NewDestination)
 
 float APHMonsterBase::GetAttackRange() const
 {
-	return StatComponent->GetAttackRange();
+	// TODO : 몬스터 스탯 공격거리 이거 설정 다시 해야함
+	//return StatComponent->GetAttackRange();
+	return 500.0f;
 }
 
 FVector APHMonsterBase::GetDestination() const

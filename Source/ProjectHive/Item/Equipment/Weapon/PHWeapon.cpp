@@ -8,7 +8,7 @@ APHWeapon::APHWeapon()
 	EquipmentType = EEquipmentType::Weapon;
 	bIsEquipped = false;
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/NewFolder/ABP_AR.ABP_AR_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnim(TEXT("/Game/ProjectHive/Animation/AR/ABP_AR.ABP_AR_C"));
 
 	if (CharacterAnim.Class)
 	{
