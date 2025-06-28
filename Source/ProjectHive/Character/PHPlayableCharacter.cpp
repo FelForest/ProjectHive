@@ -377,18 +377,6 @@ void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedIn
 			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
 		}
 	}
-	
-
-	/*InEnhancedInputComponent->BindAction(
-		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction, 
-		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].TriggerEvent,
-		this, &APHPlayableCharacter::Move);
-
-	InEnhancedInputComponent->BindAction(
-		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].InputAction,
-		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].TriggerEvent,
-		this, &APHPlayableCharacter::Interact);*/
-	
 }
 
 void APHPlayableCharacter::Move(const FInputActionValue& Value)

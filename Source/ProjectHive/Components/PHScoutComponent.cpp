@@ -13,6 +13,11 @@ UPHScoutComponent::UPHScoutComponent()
 	// ...
 }
 
+void UPHScoutComponent::ReportLocation(FVector NewLocation)
+{
+
+}
+
 
 // Called when the game starts
 void UPHScoutComponent::BeginPlay()
