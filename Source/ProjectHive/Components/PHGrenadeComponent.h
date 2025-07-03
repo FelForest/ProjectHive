@@ -46,6 +46,11 @@ public:
 	
 protected:
 	// 현재 수류탄 타입
+
+	// CONSIDER : 수류탄 종류가 늘어나면 클래스 변경 가능하게 하는 것을 고려
+	UPROPERTY(EditDefaultsOnly, Category = "Grenade")
+	TSubclassOf<APHGrenade> GrenadeClass;
+
 	APHGrenade* CurrentGrenade;
 
 	// 수류탄 갯수

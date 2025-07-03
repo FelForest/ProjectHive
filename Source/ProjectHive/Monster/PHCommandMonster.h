@@ -42,4 +42,7 @@ protected:
 
 	UPROPERTY()
 	TScriptInterface<class IPHCommandAIInterface> CommandAI;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Investigate)
+	uint8 bInvestigating : 1;
 };

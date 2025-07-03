@@ -78,14 +78,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
 
+	// 폭발 이펙트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+	TObjectPtr<class UNiagaraSystem> ExplosionEffect;
+
+	// 폭발 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+	TObjectPtr<class USoundBase> ExplosionSound;
+
 	// 컴포넌트에서 설정해줄 데이터
 
 	// 데미지
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Explosion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion")
 	float ExplosionDamage;
 
 	// 반경
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Explosion")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion")
 	float ExplosionRadius;
 
 	UPROPERTY()

@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
 
 APHGrenade::APHGrenade()
 {
@@ -31,6 +32,20 @@ APHGrenade::APHGrenade()
 	if (StaticMesh.Object)
 	{
 		StaticMeshComponent->SetStaticMesh(StaticMesh.Object);
+	}
+
+	// 이펙트 가져오기
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> ExplosionEffectRef(TEXT("/Game/Sci-Fi_Starter_VFX_Pack_Niagara/Niagara/Explosion/NS_Explosion_C4_2.NS_Explosion_C4_2"));
+	if (ExplosionEffectRef.Object)
+	{
+		ExplosionEffect = ExplosionEffectRef.Object;
+	}
+
+	// 사운드 가져오기
+	static ConstructorHelpers::FObjectFinder<USoundBase> ExplosionSoundRef(TEXT("/Game/Free_Sounds_Pack/cue/Explosion_Medium_2-1_Cue.Explosion_Medium_2-1_Cue"));
+	if (ExplosionSoundRef.Object)
+	{
+		ExplosionSound = ExplosionSoundRef.Object;
 	}
 
 	// 투사체 무브먼트 생성
@@ -79,19 +94,27 @@ void APHGrenade::Explode()
 	// TODO : 현재는 수류탄 종류가 하나만 있어서 여기서 생성, 추후 종류가 다양해지면 폭발액터 따로 만들어야함
 
 	// TODO : 폭발 이팩트 재생
+	if (ExplosionEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), GetActorRotation());
+	}
 	
 	// TODO : 폭발 사운드 재생
+	if (ExplosionSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
+	}
 	
 	// 데미지 주는 함수 -> 오버랩 생성
 	
 	UE_LOG(LogTemp, Log, TEXT("Explision"));
 
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1.0f);
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1.0f);
 
 	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplosionRadius, UDamageType::StaticClass(), /*CONSIDER : 무시해야 하는 액터들->최적화를 위한것, 벽 뒤에 있는 것들 이런건 고민 해봐야함*/ TArray<AActor*>(), this, GetInstigatorController(), true, ECC_GameTraceChannel6);
 
-	// 수류탄 제거 -> 이펙트 끝나고 삭제되어야함
-	SetLifeSpan(/*TODO : 이펙트 시간 받아와야함*/ 1.0f);
+	// 수류탄 제거
+	Destroy();
 }
 
 void APHGrenade::EndPlay(const EEndPlayReason::Type EndPlayReason)

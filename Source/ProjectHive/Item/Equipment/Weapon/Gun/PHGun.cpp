@@ -17,7 +17,7 @@ APHGun::APHGun()
 
 	// 현재 데이터 받아오는 곳이 없으므로 임의로 설정
 	MaxAmmo = 100;
-	FireRate = 3.0f;
+	FireRate = 15.0f;
 	Damage = 1.0f;
 	Range = 1000.0f;
 	MaxMagazine = 10;

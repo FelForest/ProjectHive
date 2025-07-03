@@ -10,7 +10,7 @@
 // Sets default values for this component's properties
 UPHGrenadeComponent::UPHGrenadeComponent()
 {
-	
+	GrenadeClass = APHGrenade::StaticClass();
 }
 
 void UPHGrenadeComponent::ThrowGrenade(USkeletalMeshComponent* InMesh, FVector InTargetLocation)
@@ -54,9 +54,6 @@ void UPHGrenadeComponent::SpawnGrenade()
 	// 캐릭터의 인스티게이터 -> 캐릭터 ??
 	GrenadeParms.Instigator = GetOwner()->GetInstigator();
 
-	// CONSIDER : 수류탄 종류가 늘어나면 클래스 변경 가능하게 하는 것을 고려
-	TSubclassOf<APHGrenade> GrenadeClass = APHGrenade::StaticClass();
-
 	if (GrenadeClass == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("grenade class is nullprt"));
@@ -71,9 +68,6 @@ void UPHGrenadeComponent::ApplyGrenadeData()
 	// TODO : 데이터 테이블로 받아와야함
 	// 타입, 데미지, 범위
 	// 수류탄 데미지 및 밤위 설정
-	CurrentGrenade->SetExplosionDamage(10.0f);
-	CurrentGrenade->SetExplosionRadius(500.0f);
-
 
 	auto Movement = CurrentGrenade->GetProjectileMovement();
 

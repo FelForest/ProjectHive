@@ -9,7 +9,7 @@
 #include "Interface/PHSensingAIInterface.h"
 #include "AI/PHMonsterAIInterface.h"
 #include "Interface/PHCommandMonsterInterface.h"
-
+#include "NiagaraFunctionLibrary.h"
 
 #include "Data/Monster/PHMonsterMontageAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -369,9 +369,10 @@ float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 
 	StatComponent->ChangeHP(Damage);
 
-	TakeCount += 1;
-
-	UE_LOG(LogTemp, Warning, TEXT("%d"), TakeCount);
+	if (BloodEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation(), GetActorRotation());
+	}
 
 	return 0.0f;
 }
