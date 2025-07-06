@@ -109,6 +109,9 @@ public:
 	UFUNCTION()
 	void SetUpHUD(class UPHHUDWidget* InHUDWidget);
 
+	// 죽은거 확인용
+	bool GetIsDead() const;
+
 protected:
 	// ConstructorHelpers 너무 길어서 따로 뺌
 	void LoadAssets();
@@ -188,7 +191,8 @@ protected:
 	UFUNCTION()
 	void UpdateCharacterRotator(float DeltaTime);
 
-
+	UFUNCTION()
+	void Die();
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
 
@@ -318,4 +322,11 @@ protected:
 
 	UPROPERTY()
 	uint8 bIsGrenadeAiming : 1;
+
+	UPROPERTY()
+	uint8 bIsDead : 1;
+
+	// 수류탄 던질때 던지는 위치
+	UPROPERTY()
+	FVector GreandeTarget;
 };

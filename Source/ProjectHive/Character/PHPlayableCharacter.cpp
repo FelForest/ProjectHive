@@ -83,6 +83,11 @@ APHPlayableCharacter::APHPlayableCharacter()
 	SpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 	SpringArm->bDoCollisionTest = false;
 
+	// 캐릭터 회전에 따른 컨트롤러 회전 막기
+	SpringArm->bInheritPitch = false;
+	SpringArm->bInheritRoll = false;
+	SpringArm->bInheritYaw = false;
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
@@ -116,6 +121,9 @@ APHPlayableCharacter::APHPlayableCharacter()
 	bIsAttacking = false;
 
 	bIsGrenadeAiming = false;
+
+	// 죽은 상태 평가를 위한 변수 설정
+	bIsDead = false;
 }
 
 bool APHPlayableCharacter::IsAiming() const
@@ -326,7 +334,8 @@ void APHPlayableCharacter::ThrowGrenade()
 	{
 		UE_LOG(LogTemp, Log, TEXT("Not Update MouseLocation"));
 	}
-	GrenadeComponent->ThrowGrenade(GetMesh(), MouseLocation);
+	
+	GrenadeComponent->ThrowGrenade(GetMesh(), GreandeTarget);
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bIsGrenadeAiming = false;
 }
@@ -358,6 +367,11 @@ void APHPlayableCharacter::SetUpHUD(UPHHUDWidget* InHUDWidget)
 	WeaponComponent->OnGunUpdate.AddUObject(InHUDWidget, &UPHHUDWidget::UpdateGunUI);
 
 	// 무기 버리는거 업데이트
+}
+
+bool APHPlayableCharacter::GetIsDead() const
+{
+	return bIsDead;
 }
 
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
@@ -676,11 +690,11 @@ void APHPlayableCharacter::Reload(const FInputActionValue& Value)
 
 void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
 {
-	if (bIsRunning)
+	if (bIsRunning || !bIsGrenadeAiming)
 	{
 		return;
 	}
-
+	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance == nullptr)
 	{
@@ -688,6 +702,7 @@ void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
 		return;
 	}
 
+	GreandeTarget = MouseLocation;
 	if (!AnimInstance->Montage_IsPlaying(WeaponComponent->GetThrowMontage()))
 	{
 		AnimInstance->Montage_Play(WeaponComponent->GetThrowMontage());
@@ -701,6 +716,12 @@ void APHPlayableCharacter::UpdateGrenadeAimDirection(const FInputActionValue& Va
 
 void APHPlayableCharacter::BeginGrenadeAimDirection(const FInputActionValue& Value)
 {
+	if (WeaponComponent == nullptr || WeaponComponent->GetThrowMontage() == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("ThrowMontage is nullptr"));
+		return;
+	}
+	
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	bIsGrenadeAiming = true;
 	//if (UpdateMouseLocation())
@@ -754,6 +775,9 @@ void APHPlayableCharacter::PostInitializeComponents()
 	// 무기컴포넌트에 알려주기 위한 바인딩
 	EquipmentComponent->OnEquipmentEquipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::SetWeapon);
 	EquipmentComponent->OnEquipmentUnequipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::ClearWeapon);
+
+	// 체력이 0이면 죽는 몽타주 실행
+	StatComponent->OnDead.AddUObject(this, &APHPlayableCharacter::Die);
 }
 
 void APHPlayableCharacter::PossessedBy(AController* NewController)
@@ -795,6 +819,25 @@ void APHPlayableCharacter::UpdateCharacterRotator(float DeltaTime)
 			}
 		}
 	}
+}
+
+void APHPlayableCharacter::Die()
+{
+	bIsDead = true;
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	DisableInput(PlayerController);
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AnimInstance is nullptr : Die"));
+		return;
+	}
+
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(DeadMontage, 1.0f);
 }
 
 void APHPlayableCharacter::OnWeaponEquipped()

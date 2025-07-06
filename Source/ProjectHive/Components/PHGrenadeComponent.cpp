@@ -38,8 +38,6 @@ void UPHGrenadeComponent::SetGrenadeData(USkeletalMeshComponent* InMesh, FVector
 	InitSpeed = 3000;
 	MaxSpeed = 10000.0f;
 
-	
-
 	// 원래는 지역 변수로 하려고 했는데, 다른 함수에서도 쓰기 때문에 그냥 맴버변수 설정함
 	SpawnLocation = InMesh->GetSocketLocation(TEXT("GrenadeSocket"));
 	SpawnRotation = InMesh->GetSocketRotation(TEXT("GrenadeSocket"));

@@ -68,6 +68,12 @@ void APHGun::Fire()
 		}
 	}
 
+	// 사운드 재생
+	if (NormalFireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, NormalFireSound, MuzzleLocation);
+	}
+
 #if WITH_EDITOR
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f, 0, 1.0f);
 #endif

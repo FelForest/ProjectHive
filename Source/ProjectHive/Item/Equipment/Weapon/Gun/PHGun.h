@@ -151,6 +151,8 @@ protected:
 	UPROPERTY()
 	FTimerHandle FireRateHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = FireSound)
+	TObjectPtr<class USoundBase> NormalFireSound;
 
 	// 무기마다 몽타주가 다르기 때문에 무기에서 관리하는 방식으로 설정 -> 추후 데이터 에셋으로 불러오게 만들예정
 	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Montage, meta = (AllowPrivateAccess = "ture"))

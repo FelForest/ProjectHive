@@ -37,4 +37,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SkeletalMeshData)
 	TObjectPtr<class UPHCharacterSkeletalMeshData> PartsMeshData;
 
+	// Montage Section
+	UPROPERTY(EditAnywhere, BLueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "ture"))
+	TObjectPtr<class UAnimMontage> DeadMontage;
 };

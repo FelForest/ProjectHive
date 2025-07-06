@@ -42,6 +42,12 @@ APHPartsCharacter::APHPartsCharacter()
 		SetCharacterPartsMesh();
 	}
 
+	// Setting DeadMontage
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Game/ProjectHive/Animation/AM_DIe.AM_DIe"));
+	if (DeadMontageRef.Object != nullptr)
+	{
+		DeadMontage = DeadMontageRef.Object;
+	}
 }
 
 void APHPartsCharacter::BeginPlay()

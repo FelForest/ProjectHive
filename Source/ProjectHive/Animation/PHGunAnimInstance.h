@@ -69,6 +69,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsIdle : 1;
 
+	// 현재 살아있는지 확인
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsDead : 1;
+	
 	// 현재 액터 앞 방향
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	FRotator Rotation;

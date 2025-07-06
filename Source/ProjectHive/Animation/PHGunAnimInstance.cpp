@@ -10,6 +10,7 @@
 
 UPHGunAnimInstance::UPHGunAnimInstance()
 {
+	bIsDead = false;
 }
 
 void UPHGunAnimInstance::NativeInitializeAnimation()
@@ -38,6 +39,9 @@ void UPHGunAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		return;
 	}
+
+	// 현재 살아 있는지 확인
+	bIsDead = Owner->GetIsDead();
 
 	// 이동 속도 업데이트
 	if (Movement != nullptr)
