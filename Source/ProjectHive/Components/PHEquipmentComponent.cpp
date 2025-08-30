@@ -132,7 +132,7 @@ void UPHEquipmentComponent::DropEquipment(APHEquipment* InEquipment)
 	// 기존 장비 해제
 	EquipmentSlots[InEquipment->GetEquipmentType()] = nullptr;
 
-	if (InEquipment->GetEquipmentType() == EEquipmentType::Weapon)
+	if (InEquipment->GetEquipmentType() == EEquipmentType::Weapon && InEquipment == WeaponInventory[CurrentWeaponIndex])
 	{
 		WeaponCount -= 1;
 		WeaponInventory[CurrentWeaponIndex] = nullptr;

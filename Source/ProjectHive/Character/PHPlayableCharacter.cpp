@@ -614,10 +614,10 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 	}
 
 	// 스왑이 가능한지 확인
-	if (!EquipmentComponent->CanSwapWeapon(SwapDirection))
+	/*if (!EquipmentComponent->CanSwapWeapon(SwapDirection))
 	{
 		return;
-	}
+	}*/
 
 	// 몽타주 실행
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -787,18 +787,7 @@ void APHPlayableCharacter::PossessedBy(AController* NewController)
 	PlayerController = CastChecked<APHPlayerController>(NewController);
 }
 
-void APHPlayableCharacter::OnDeferredWeaponEquipped()
-{
-	// 무기 컴포넌트에 가서 무기의 애님인스턴스 가져오기
-	if (WeaponComponent->GetWeapon() == nullptr)
-	{
-		// TODO : 기본 애니메이션 만들면 교체 예정
-		// 무기가 없으면 기본 애니메이션 현재는 지금 없으므로 nullptr
-		GetMesh()->SetAnimClass(CharacterAnim);
-		return;
-	}
-	GetMesh()->SetAnimClass(WeaponComponent->GetWeapon()->GetWeaponAnimClass());
-}
+
 
 void APHPlayableCharacter::UpdateCharacterRotator(float DeltaTime)
 {
@@ -840,12 +829,21 @@ void APHPlayableCharacter::Die()
 	AnimInstance->Montage_Play(DeadMontage, 1.0f);
 }
 
+void APHPlayableCharacter::OnDeferredWeaponEquipped()
+{
+	// 무기 컴포넌트에 가서 무기의 애님인스턴스 가져오기
+	if (WeaponComponent->GetWeapon() == nullptr)
+	{
+		GetMesh()->SetAnimClass(CharacterAnim);
+		return;
+	}
+	GetMesh()->SetAnimClass(WeaponComponent->GetWeapon()->GetWeaponAnimClass());
+}
+
 void APHPlayableCharacter::OnWeaponEquipped()
 {
 	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지하기 위해 다음 프레임에서 캐릭터 애니메이션 변경 
 	GetWorldTimerManager().SetTimerForNextTick(this, &APHPlayableCharacter::OnDeferredWeaponEquipped);
-
-	// 여기서 브로드 캐스트 해주는게 맞는거 같기는한데...->이거 몽타주에서 해줘야 하는건가?
 }
 
 void APHPlayableCharacter::OnWeaponUnequipped()
