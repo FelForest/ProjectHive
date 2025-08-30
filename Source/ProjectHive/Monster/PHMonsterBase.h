@@ -36,6 +36,8 @@
  * Attackable Interface를 만들어야 하나
  */
 
+static int32 TakeCount;
+
 UCLASS()
 class PROJECTHIVE_API APHMonsterBase : public ACharacter,
 	public IPHAlertCallerInterface
@@ -145,6 +147,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	TObjectPtr<class UPHMonsterStatComponent> StatComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Blood)
+	TObjectPtr<class UNiagaraSystem> BloodEffect;
+
 	// 광폭화 비율? 흥분도
 	// 몬스터가 흥분도에 따라 능력치가 변하게 변경
 	// TODO : 현재는 전투 시간에 따라 변경하는 것정도로 간단하지만 조건이 많아지면 컴포넌트로 분리해야함
@@ -169,7 +174,7 @@ protected:
 	UPROPERTY()
 	uint8 bIsAlerting : 1;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	uint8 bIsInCombat : 1;
 
 private:

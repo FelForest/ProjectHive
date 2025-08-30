@@ -9,7 +9,7 @@
 #include "Interface/PHSensingAIInterface.h"
 #include "AI/PHMonsterAIInterface.h"
 #include "Interface/PHCommandMonsterInterface.h"
-
+#include "NiagaraFunctionLibrary.h"
 
 #include "Data/Monster/PHMonsterMontageAsset.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -17,6 +17,7 @@
 // Sets default values
 APHMonsterBase::APHMonsterBase()
 {
+	TakeCount = 0;
 	// 감지 설정
 	SensingComponent = CreateDefaultSubobject<UPHMonsterSensingComponent>(TEXT("SensingComponent"));
 
@@ -290,7 +291,9 @@ void APHMonsterBase::SetDestination(FVector NewDestination)
 
 float APHMonsterBase::GetAttackRange() const
 {
-	return StatComponent->GetAttackRange();
+	// TODO : 몬스터 스탯 공격거리 이거 설정 다시 해야함
+	//return StatComponent->GetAttackRange();
+	return 500.0f;
 }
 
 FVector APHMonsterBase::GetDestination() const
@@ -365,6 +368,11 @@ float APHMonsterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 	bIsInCombat = true;
 
 	StatComponent->ChangeHP(Damage);
+
+	if (BloodEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), BloodEffect, GetActorLocation(), GetActorRotation());
+	}
 
 	return 0.0f;
 }

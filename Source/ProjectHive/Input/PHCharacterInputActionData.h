@@ -24,6 +24,8 @@ enum class ECharacterActionType : uint8
 	RunEnd = 10,
 	Reload = 11,
 	ThrowGrenade = 12,
+	AimGrenade = 13,
+	AimGrenadeStart = 14,
 };
 
 USTRUCT()

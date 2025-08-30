@@ -36,12 +36,6 @@ public:
 		return Hp;
 	}
 
-	UFUNCTION()
-	FORCEINLINE float GetAttackRange() const
-	{
-		return AttackRange;
-	}
-
 protected:
 	
 	
@@ -68,7 +62,4 @@ protected:
 	// 이동 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	float MoveSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
-	float AttackRange;
 };

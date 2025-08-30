@@ -83,6 +83,11 @@ APHPlayableCharacter::APHPlayableCharacter()
 	SpringArm->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 	SpringArm->bDoCollisionTest = false;
 
+	// 캐릭터 회전에 따른 컨트롤러 회전 막기
+	SpringArm->bInheritPitch = false;
+	SpringArm->bInheritRoll = false;
+	SpringArm->bInheritYaw = false;
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
@@ -114,6 +119,11 @@ APHPlayableCharacter::APHPlayableCharacter()
 	// TODO : 발사 속도 조절을 위해서 어쩌구 저쩌구 Test
 	FireRate = 1.0f;
 	bIsAttacking = false;
+
+	bIsGrenadeAiming = false;
+
+	// 죽은 상태 평가를 위한 변수 설정
+	bIsDead = false;
 }
 
 bool APHPlayableCharacter::IsAiming() const
@@ -214,6 +224,10 @@ void APHPlayableCharacter::Tick(float DeltaTime)
 	TensionDecreaseTimeline.TickTimeline(DeltaTime);
 	TensionIncreaseTimeline.TickTimeline(DeltaTime);
 	SettingRotationTimeline.TickTimeline(DeltaTime);
+	if (bIsGrenadeAiming || bIsAiming)
+	{
+		UpdateCharacterRotator(DeltaTime);
+	}
 }
 
 void APHPlayableCharacter::InitializeTimeLine()
@@ -251,6 +265,8 @@ void APHPlayableCharacter::InitializeActionMappings()
 	ActionMapping.Add(ECharacterActionType::RunEnd, &APHPlayableCharacter::RunEnd);
 	ActionMapping.Add(ECharacterActionType::Reload, &APHPlayableCharacter::Reload);
 	ActionMapping.Add(ECharacterActionType::ThrowGrenade, &APHPlayableCharacter::ThrowGrenade);
+	ActionMapping.Add(ECharacterActionType::AimGrenade, &APHPlayableCharacter::UpdateGrenadeAimDirection);
+	ActionMapping.Add(ECharacterActionType::AimGrenadeStart, &APHPlayableCharacter::BeginGrenadeAimDirection);
 	
 }
 
@@ -318,7 +334,10 @@ void APHPlayableCharacter::ThrowGrenade()
 	{
 		UE_LOG(LogTemp, Log, TEXT("Not Update MouseLocation"));
 	}
-	GrenadeComponent->ThrowGrenade(GetMesh(), MouseLocation);
+	
+	GrenadeComponent->ThrowGrenade(GetMesh(), GreandeTarget);
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	bIsGrenadeAiming = false;
 }
 
 float APHPlayableCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -350,6 +369,11 @@ void APHPlayableCharacter::SetUpHUD(UPHHUDWidget* InHUDWidget)
 	// 무기 버리는거 업데이트
 }
 
+bool APHPlayableCharacter::GetIsDead() const
+{
+	return bIsDead;
+}
+
 void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedInputComponent)
 {
 	for (const auto& pair : CharacterInputActionData->InputBindings)
@@ -367,18 +391,6 @@ void APHPlayableCharacter::BindInputAction(UEnhancedInputComponent* InEnhancedIn
 			InEnhancedInputComponent->BindAction(Action, TriggerEvent, this, *MappingFunc);
 		}
 	}
-	
-
-	/*InEnhancedInputComponent->BindAction(
-		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].InputAction, 
-		CharacterInputActionData->InputBindings[ECharacterActionType::MoveAction].TriggerEvent,
-		this, &APHPlayableCharacter::Move);
-
-	InEnhancedInputComponent->BindAction(
-		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].InputAction,
-		CharacterInputActionData->InputBindings[ECharacterActionType::InteractAction].TriggerEvent,
-		this, &APHPlayableCharacter::Interact);*/
-	
 }
 
 void APHPlayableCharacter::Move(const FInputActionValue& Value)
@@ -556,18 +568,18 @@ void APHPlayableCharacter::AimHold(const FInputActionValue& Value)
 	/*SettingRotationTimeline.SetLooping(false);
 	SettingRotationTimeline.PlayFromStart();*/
 	// 마우스 위치 받아오기
-	if (UpdateMouseLocation())
-	{
-		// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
-		const FVector ToMouse = MouseLocation - GetActorLocation();
+	//if (UpdateMouseLocation())
+	//{
+	//	// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+	//	const FVector ToMouse = MouseLocation - GetActorLocation();
 
-		if (!ToMouse.IsNearlyZero())
-		{
-			FRotator CurrentRotation = GetActorRotation();
-			const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
-			SetActorRotation(NewRotation);	
-		}
-	}
+	//	if (!ToMouse.IsNearlyZero())
+	//	{
+	//		FRotator CurrentRotation = GetActorRotation();
+	//		const FRotator NewRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
+	//		SetActorRotation(NewRotation);	
+	//	}
+	//}
 }
 
 void APHPlayableCharacter::AimEnd(const FInputActionValue& Value)
@@ -602,10 +614,10 @@ void APHPlayableCharacter::SwapWeapon(const FInputActionValue& Value)
 	}
 
 	// 스왑이 가능한지 확인
-	if (!EquipmentComponent->CanSwapWeapon(SwapDirection))
+	/*if (!EquipmentComponent->CanSwapWeapon(SwapDirection))
 	{
 		return;
-	}
+	}*/
 
 	// 몽타주 실행
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -678,11 +690,11 @@ void APHPlayableCharacter::Reload(const FInputActionValue& Value)
 
 void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
 {
-	if (bIsRunning)
+	if (bIsRunning || !bIsGrenadeAiming)
 	{
 		return;
 	}
-
+	
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance == nullptr)
 	{
@@ -690,7 +702,41 @@ void APHPlayableCharacter::ThrowGrenade(const FInputActionValue& Value)
 		return;
 	}
 
-	AnimInstance->Montage_Play(WeaponComponent->GetThrowMontage());
+	GreandeTarget = MouseLocation;
+	if (!AnimInstance->Montage_IsPlaying(WeaponComponent->GetThrowMontage()))
+	{
+		AnimInstance->Montage_Play(WeaponComponent->GetThrowMontage());
+	}
+}
+
+void APHPlayableCharacter::UpdateGrenadeAimDirection(const FInputActionValue& Value)
+{
+
+}
+
+void APHPlayableCharacter::BeginGrenadeAimDirection(const FInputActionValue& Value)
+{
+	if (WeaponComponent == nullptr || WeaponComponent->GetThrowMontage() == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("ThrowMontage is nullptr"));
+		return;
+	}
+	
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	bIsGrenadeAiming = true;
+	//if (UpdateMouseLocation())
+	//{
+	//	// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+	//	const FVector ToMouse = MouseLocation - GetActorLocation();
+
+	//	if (!ToMouse.IsNearlyZero())
+	//	{
+	//		FRotator CurrentRotation = GetActorRotation();
+	//		float NewYaw = FMath::Lerp(CurrentRotation.Yaw, ToMouse.Rotation().Yaw, 0.0f);
+	//		const FRotator TargetRotation = FRotator(CurrentRotation.Pitch, NewYaw, CurrentRotation.Roll);
+	//		SetActorRotation(TargetRotation);
+	//	}
+	//}
 }
 
 void APHPlayableCharacter::PickupItem(APHItem* InItem)
@@ -729,6 +775,9 @@ void APHPlayableCharacter::PostInitializeComponents()
 	// 무기컴포넌트에 알려주기 위한 바인딩
 	EquipmentComponent->OnEquipmentEquipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::SetWeapon);
 	EquipmentComponent->OnEquipmentUnequipped.AddUObject(WeaponComponent.Get(), &UPHWeaponComponent::ClearWeapon);
+
+	// 체력이 0이면 죽는 몽타주 실행
+	StatComponent->OnDead.AddUObject(this, &APHPlayableCharacter::Die);
 }
 
 void APHPlayableCharacter::PossessedBy(AController* NewController)
@@ -738,13 +787,53 @@ void APHPlayableCharacter::PossessedBy(AController* NewController)
 	PlayerController = CastChecked<APHPlayerController>(NewController);
 }
 
+
+
+void APHPlayableCharacter::UpdateCharacterRotator(float DeltaTime)
+{
+	if (UpdateMouseLocation())
+	{
+		// 마우스 위치 - 액터 위치 -> 방향 벡터 계산
+		const FVector ToMouse = MouseLocation - GetActorLocation();
+
+		if (!ToMouse.IsNearlyZero())
+		{
+			FRotator CurrentRotation = GetActorRotation();
+			const FRotator TargetRotation = FRotator(CurrentRotation.Pitch, ToMouse.Rotation().Yaw, CurrentRotation.Roll);
+			const FRotator NewRot = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 10.0f);
+			SetActorRotation(NewRot);
+			if (CurrentRotation.Equals(TargetRotation, 1.0f))
+			{
+				bIsGrenadeAiming = false;
+			}
+		}
+	}
+}
+
+void APHPlayableCharacter::Die()
+{
+	bIsDead = true;
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	DisableInput(PlayerController);
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance == nullptr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AnimInstance is nullptr : Die"));
+		return;
+	}
+
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(DeadMontage, 1.0f);
+}
+
 void APHPlayableCharacter::OnDeferredWeaponEquipped()
 {
 	// 무기 컴포넌트에 가서 무기의 애님인스턴스 가져오기
 	if (WeaponComponent->GetWeapon() == nullptr)
 	{
-		// TODO : 기본 애니메이션 만들면 교체 예정
-		// 무기가 없으면 기본 애니메이션 현재는 지금 없으므로 nullptr
 		GetMesh()->SetAnimClass(CharacterAnim);
 		return;
 	}
@@ -755,8 +844,6 @@ void APHPlayableCharacter::OnWeaponEquipped()
 {
 	// PostAnimEvaluation() 재귀 호출로 인한 크러시를 방지하기 위해 다음 프레임에서 캐릭터 애니메이션 변경 
 	GetWorldTimerManager().SetTimerForNextTick(this, &APHPlayableCharacter::OnDeferredWeaponEquipped);
-
-	// 여기서 브로드 캐스트 해주는게 맞는거 같기는한데...->이거 몽타주에서 해줘야 하는건가?
 }
 
 void APHPlayableCharacter::OnWeaponUnequipped()

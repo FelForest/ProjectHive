@@ -10,7 +10,7 @@ public class ProjectHive : ModuleRules
 
         PublicIncludePaths.Add("ProjectHive");
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks", "AdvancedWidgets" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks", "AdvancedWidgets", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "AnimGraphRuntime" });
 

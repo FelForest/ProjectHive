@@ -17,7 +17,7 @@ APHGun::APHGun()
 
 	// 현재 데이터 받아오는 곳이 없으므로 임의로 설정
 	MaxAmmo = 100;
-	FireRate = 3.0f;
+	FireRate = 15.0f;
 	Damage = 1.0f;
 	Range = 1000.0f;
 	MaxMagazine = 10;
@@ -68,6 +68,12 @@ void APHGun::Fire()
 		}
 	}
 
+	// 사운드 재생
+	if (NormalFireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, NormalFireSound, MuzzleLocation);
+	}
+
 #if WITH_EDITOR
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f, 0, 1.0f);
 #endif
@@ -85,7 +91,6 @@ void APHGun::Reload()
 	UE_LOG(LogTemp, Log, TEXT("Reload"));
 	CurrentMagazine -= 1;
 	CurrentAmmo = MaxAmmo;
-	// 캐릭터에서 실행하는거여서 모르겠다
 	OnGunUpdate.Broadcast(GetGunState());
 }
 

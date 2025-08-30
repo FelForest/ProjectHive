@@ -109,6 +109,9 @@ public:
 	UFUNCTION()
 	void SetUpHUD(class UPHHUDWidget* InHUDWidget);
 
+	// 죽은거 확인용
+	bool GetIsDead() const;
+
 protected:
 	// ConstructorHelpers 너무 길어서 따로 뺌
 	void LoadAssets();
@@ -150,6 +153,11 @@ protected:
 
 	void ThrowGrenade(const FInputActionValue& Value);
 
+	void UpdateGrenadeAimDirection(const FInputActionValue& Value);
+
+	void BeginGrenadeAimDirection(const FInputActionValue& Value);
+
+
 	void SetMappingContext();
 	
 	// 입력시 마우스 위치 업데이트
@@ -180,6 +188,11 @@ protected:
 	UFUNCTION()
 	void OnDeferredWeaponEquipped();
 
+	UFUNCTION()
+	void UpdateCharacterRotator(float DeltaTime);
+
+	UFUNCTION()
+	void Die();
 public:
 	FOnEquipmentAcquired OnEquipmentAcquired;
 
@@ -306,4 +319,14 @@ protected:
 
 	UPROPERTY()
 	int32 SwapDirection;
+
+	UPROPERTY()
+	uint8 bIsGrenadeAiming : 1;
+
+	UPROPERTY()
+	uint8 bIsDead : 1;
+
+	// 수류탄 던질때 던지는 위치
+	UPROPERTY()
+	FVector GreandeTarget;
 };

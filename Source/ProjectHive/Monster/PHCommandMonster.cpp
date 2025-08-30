@@ -19,6 +19,8 @@ APHCommandMonster::APHCommandMonster()
 
 	// 하위 배열 크기 설정
 	//Subordinates.Init(nullptr, OrdinateNum);
+
+	bInvestigating = false;
 }
 
 void APHCommandMonster::CallAlertTargetBegin(APawn* NewTarget)
@@ -65,6 +67,7 @@ void APHCommandMonster::SetNewDestination(FVector NewDestination)
 	SetDestination(NewDestination);
 	SetIsOnAlert(true);
 
+	bInvestigating = true;
 
 	for (APHMonsterBase*& Subordinate : Subordinates)
 	{
