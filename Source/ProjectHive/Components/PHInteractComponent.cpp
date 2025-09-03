@@ -29,10 +29,8 @@ void UPHInteractComponent::Interact()
 
 void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// 일단 고민만 한걸로 하고 먼저 싱글로
 	IPHInteractableInterface* Interactable = Cast<IPHInteractableInterface>(OtherActor);
-
-	// 엔진 단에서 확인은 하지만 혹시나 해서 확인 -> 대부분 휴먼 오류
+	
 	if (Interactable == nullptr)
 	{
 		return;
@@ -57,9 +55,6 @@ void UPHInteractComponent::OnInteractableBeginOverlap(UPrimitiveComponent* Overl
 }
 void UPHInteractComponent::OnInteractableEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// 서버
-	// 상호작용 액션 가능 값을 false로 변경
-
 	// 범위 벗어난 액터가 현재 UI띄워주고 있는 객체인지 확인 후 UI 갱신
 	if (Target == OtherActor)
 	{
